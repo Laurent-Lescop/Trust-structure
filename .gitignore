@@ -1,0 +1,13 @@
+# Réglages locaux de l'éditeur / de l'assistant
+.claude/
+.vscode/
+.idea/
+
+# Systèmes
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Node (aucune dépendance n'est nécessaire, par précaution)
+node_modules/
+*.log

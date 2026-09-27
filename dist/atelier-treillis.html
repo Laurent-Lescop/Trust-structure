@@ -1,0 +1,3035 @@
+<title>Atelier Treillis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #E7ECEA; --panel: #F7F9F8; --inset: #E1E7E4; --raised: #FFFFFF;
+  --ink: #152024; --ink-2: #4F5F64; --ink-3: #75868A; --line: #C8D2CF; --line-2: #DCE3E0;
+  --accent: #2B6B66; --accent-2: #3A8680; --on-accent: #FFFFFF; --accent-soft: #D3E6E2;
+  --tension: #2C62AE; --compression: #BD3F2D;
+  --ok: #2A7A4B; --warn: #936012; --bad: #B0302A;
+  --ok-soft: #D8ECDF; --warn-soft: #F4E6CB; --bad-soft: #F5D8D4;
+  --cell-ok: #9CCDAE; --cell-warn: #EBC77C; --cell-bad: #E59A8F; --cell-na: #D6DCDA;
+  --stage-top: #D5DDDA; --stage-bot: #F1F4F2; --hud-bg: rgba(247, 249, 248, 0.86);
+  --socle-top: #F2F0EB; --socle-side: #CBC7BE; --slab: #BFC5C2; --figure: #FBFBF8; --neutral-3d: #A7B0B3;
+  --font-ui: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0F1517; --panel: #161F22; --inset: #1E292D; --raised: #1B2528;
+    --ink: #E2EAE8; --ink-2: #A0B0B3; --ink-3: #74878B; --line: #2D3A3E; --line-2: #243034;
+    --accent: #6CB6AC; --accent-2: #88C8BF; --on-accent: #0A1715; --accent-soft: #1D3A37;
+    --tension: #72A2EA; --compression: #F08270;
+    --ok: #62C88E; --warn: #E6B45C; --bad: #F2776E;
+    --ok-soft: #173327; --warn-soft: #3A2E17; --bad-soft: #3D1D1B;
+    --cell-ok: #2F6B49; --cell-warn: #7D6424; --cell-bad: #7E3530; --cell-na: #253033;
+    --stage-top: #0B1012; --stage-bot: #1B2427; --hud-bg: rgba(22, 31, 34, 0.86);
+    --socle-top: #DAD7D0; --socle-side: #A5A198; --slab: #9CA3A0; --figure: #F1F1EC; --neutral-3d: #8E989B;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0F1517; --panel: #161F22; --inset: #1E292D; --raised: #1B2528;
+  --ink: #E2EAE8; --ink-2: #A0B0B3; --ink-3: #74878B; --line: #2D3A3E; --line-2: #243034;
+  --accent: #6CB6AC; --accent-2: #88C8BF; --on-accent: #0A1715; --accent-soft: #1D3A37;
+  --tension: #72A2EA; --compression: #F08270;
+  --ok: #62C88E; --warn: #E6B45C; --bad: #F2776E;
+  --ok-soft: #173327; --warn-soft: #3A2E17; --bad-soft: #3D1D1B;
+  --cell-ok: #2F6B49; --cell-warn: #7D6424; --cell-bad: #7E3530; --cell-na: #253033;
+  --stage-top: #0B1012; --stage-bot: #1B2427; --hud-bg: rgba(22, 31, 34, 0.86);
+  --socle-top: #DAD7D0; --socle-side: #A5A198; --slab: #9CA3A0; --figure: #F1F1EC; --neutral-3d: #8E989B;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 13.5px/1.45 var(--font-ui); -webkit-font-smoothing: antialiased; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono, .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ---------- Cadre ---------- */
+.app { height: 100%; display: grid; grid-template-columns: 330px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+.bar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand svg { flex: none; color: var(--accent); }
+.brand strong { display: block; font-weight: 750; font-size: 17px; letter-spacing: 0.01em; font-variation-settings: 'wdth' 82; text-transform: uppercase; line-height: 1.1; }
+.brand span { display: block; color: var(--ink-3); font-size: 12px; font-variation-settings: 'wdth' 90; }
+.verdict { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 10px; border-radius: 999px; background: var(--inset); font-weight: 600; font-variation-settings: 'wdth' 88; white-space: nowrap; cursor: pointer; border: 0; }
+.verdict .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ink-3); }
+.verdict small { font-weight: 450; color: var(--ink-2); }
+.verdict[data-s="ok"] { background: var(--ok-soft); } .verdict[data-s="ok"] .dot { background: var(--ok); }
+.verdict[data-s="warn"] { background: var(--warn-soft); } .verdict[data-s="warn"] .dot { background: var(--warn); }
+.verdict[data-s="bad"] { background: var(--bad-soft); } .verdict[data-s="bad"] .dot { background: var(--bad); }
+
+/* ---------- Paramètres ---------- */
+.params { overflow-y: auto; background: var(--panel); border-right: 1px solid var(--line); padding: 4px 16px 24px; }
+.psec { padding: 14px 0 10px; border-bottom: 1px solid var(--line-2); }
+.psec:last-of-type { border-bottom: 0; }
+.psec h3 { margin: 0 0 10px; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-2); font-variation-settings: 'wdth' 80; }
+.ctl { margin: 0 0 12px; }
+.ctl:last-child { margin-bottom: 0; }
+.ctl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.ctl-head label { color: var(--ink); font-weight: 500; }
+.valbox { display: inline-flex; align-items: baseline; gap: 3px; }
+.valbox input { width: 64px; text-align: right; padding: 2px 5px; border: 1px solid transparent; border-radius: 4px; background: transparent; font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.valbox input:hover { border-color: var(--line); }
+.valbox input:focus { border-color: var(--accent); background: var(--raised); outline: none; }
+.valbox .u { color: var(--ink-3); font-size: 12px; min-width: 14px; }
+.note { color: var(--ink-3); font-size: 12px; margin-top: 3px; line-height: 1.35; }
+input[type=range] { width: 100%; margin: 2px 0; accent-color: var(--accent); height: 18px; background: transparent; }
+.seg { display: flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--raised); }
+.seg button { flex: 1 1 0; min-width: 0; border: 0; background: transparent; padding: 6px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12.5px; font-variation-settings: 'wdth' 86; color: var(--ink-2); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button:hover { background: var(--inset); color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.seg svg { display: block; }
+select.sel { width: 100%; padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--raised); }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; }
+.switch input { appearance: none; width: 34px; height: 20px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; transition: background .15s; flex: none; margin: 0; }
+.switch input::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--raised); transition: transform .15s; }
+.switch input:checked { background: var(--accent); }
+.switch input:checked::after { transform: translateX(14px); }
+.btn { border: 1px solid var(--line); background: var(--raised); border-radius: var(--r); padding: 6px 12px; cursor: pointer; font-weight: 550; font-variation-settings: 'wdth' 88; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent-2); color: var(--on-accent); }
+.derived { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 8px 10px; background: var(--inset); border-radius: var(--r); font-size: 12.5px; color: var(--ink-2); margin-top: 8px; }
+.derived b { font-weight: 500; color: var(--ink); font-family: var(--font-mono); font-size: 12px; text-align: right; }
+
+/* ---------- Scène ---------- */
+.stage { display: grid; grid-template-rows: minmax(320px, 1fr) minmax(220px, 42%); min-height: 0; min-width: 0; }
+.viewport { position: relative; overflow: hidden; background: linear-gradient(180deg, var(--stage-top), var(--stage-bot)); min-height: 0; }
+.viewport canvas.gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.viewport .labels { position: absolute; inset: 0; pointer-events: none; }
+.dim-label { font: 500 11px/1 var(--font-mono); color: var(--ink); background: var(--hud-bg); padding: 3px 6px; border-radius: 4px; white-space: nowrap; border: 1px solid var(--line); }
+.dim-label.hi { color: var(--accent); }
+.hud { position: absolute; z-index: 2; }
+.hud-tl { top: 12px; left: 12px; display: flex; gap: 1px; background: var(--line); border-radius: var(--r); overflow: hidden; border: 1px solid var(--line); box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.kf { background: var(--hud-bg); padding: 7px 12px; min-width: 88px; backdrop-filter: blur(6px); }
+.kf span { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); font-variation-settings: 'wdth' 80; font-weight: 600; }
+.kf b { display: block; font: 600 17px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
+.kf b small { font-size: 11px; font-weight: 500; color: var(--ink-2); margin-left: 2px; }
+.hud-tr { top: 12px; right: 12px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.hud-bl { left: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.hud-br { right: 12px; bottom: 12px; }
+.disp-toggle { display: none; background: var(--hud-bg); }
+.chipbar { display: flex; background: var(--hud-bg); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; backdrop-filter: blur(6px); }
+.chipbar button { border: 0; background: transparent; padding: 5px 9px; cursor: pointer; font-size: 12px; font-variation-settings: 'wdth' 86; color: var(--ink-2); white-space: nowrap; }
+.chipbar button + button { border-left: 1px solid var(--line-2); }
+.chipbar button:hover { color: var(--ink); background: var(--inset); }
+.chipbar button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.chipbar .lbl { padding: 5px 8px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); font-weight: 600; font-variation-settings: 'wdth' 80; align-self: center; }
+.legend { background: var(--hud-bg); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 10px; font-size: 11.5px; backdrop-filter: blur(6px); display: grid; gap: 3px; min-width: 150px; }
+.legend .row { display: flex; align-items: center; gap: 7px; }
+.legend i { width: 14px; height: 4px; border-radius: 2px; display: inline-block; flex: none; }
+.legend .grad { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #3E9A62, #C9B23A 60%, #E0892E 85%, #D0402F); margin: 2px 0; }
+.legend .scale { display: flex; justify-content: space-between; color: var(--ink-3); font-family: var(--font-mono); font-size: 10.5px; }
+.tip { position: absolute; z-index: 5; pointer-events: none; background: var(--raised); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 10px; font-size: 12px; line-height: 1.45; box-shadow: 0 6px 20px rgba(0,0,0,.14); max-width: 290px; }
+.tip strong { font-weight: 650; }
+.tip .k { color: var(--ink-3); }
+.tip .t { color: var(--tension); } .tip .c { color: var(--compression); }
+.gl-error { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--ink-2); }
+
+/* ---------- Dock ---------- */
+.dock { display: flex; flex-direction: column; min-height: 0; border-top: 1px solid var(--line); background: var(--panel); }
+.tabs { display: flex; gap: 2px; overflow-x: auto; padding: 0 12px; border-bottom: 1px solid var(--line); flex: none; scrollbar-width: none; }
+.tabs button { border: 0; background: transparent; padding: 10px 12px 9px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink-3); border-bottom: 2px solid transparent; white-space: nowrap; font-variation-settings: 'wdth' 86; }
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.panes { flex: 1; overflow: auto; min-height: 0; }
+.pane { padding: 16px; }
+.pane h4 { margin: 0 0 8px; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .09em; color: var(--ink-2); font-variation-settings: 'wdth' 80; }
+.cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; }
+.lead { color: var(--ink-2); max-width: 70ch; margin: 0 0 12px; }
+
+.checks { display: grid; gap: 1px; background: var(--line-2); border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden; }
+.check { background: var(--panel); display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; padding: 9px 12px; }
+.check summary { list-style: none; cursor: pointer; display: contents; }
+.pill { display: inline-block; align-self: start; font-size: 10.5px; font-weight: 650; text-transform: uppercase; letter-spacing: .06em; padding: 3px 7px; border-radius: 999px; text-align: center; font-variation-settings: 'wdth' 82; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.check .ttl { font-weight: 600; }
+.check .val { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+.check .exp { color: var(--ink-2); font-size: 12.5px; margin-top: 3px; max-width: 72ch; }
+
+table.t { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.t th { text-align: left; font-weight: 600; color: var(--ink-3); font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; padding: 6px 8px; border-bottom: 1px solid var(--line); font-variation-settings: 'wdth' 82; white-space: nowrap; }
+table.t td { padding: 6px 8px; border-bottom: 1px solid var(--line-2); vertical-align: top; }
+table.t td.n, table.t th.n { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.t tr.cat td { background: var(--inset); font-weight: 650; font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-2); padding: 5px 8px; }
+table.t tfoot td { font-weight: 650; border-top: 1px solid var(--line); border-bottom: 0; }
+.scroll-x { overflow-x: auto; }
+.bar-u { position: relative; height: 6px; background: var(--inset); border-radius: 3px; min-width: 70px; margin-top: 6px; }
+.bar-u i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+.small { font-size: 12px; color: var(--ink-3); }
+
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line-2); border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden; margin-bottom: 16px; }
+.tile { background: var(--panel); padding: 10px 12px; }
+.tile span { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); font-weight: 600; font-variation-settings: 'wdth' 80; }
+.tile b { display: block; font: 600 18px/1.25 var(--font-mono); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.tile b small { font-size: 11px; font-weight: 500; color: var(--ink-2); }
+.toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.toolbar label { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink-2); }
+.toolbar select { max-width: 100%; }
+
+.svgwrap { border: 1px solid var(--line-2); border-radius: var(--r); background: var(--raised); overflow: hidden; }
+.svgwrap svg { display: block; width: 100%; height: auto; }
+svg .ink { fill: var(--ink); } svg .ink2 { fill: var(--ink-2); } svg .ink3 { fill: var(--ink-3); }
+svg .s-ink2 { stroke: var(--ink-2); } svg .s-line { stroke: var(--line); }
+.mapwrap { position: relative; }
+.maptip { position: absolute; pointer-events: none; }
+.progress { height: 3px; background: var(--inset); border-radius: 2px; overflow: hidden; margin: 6px 0 10px; }
+.progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .1s; }
+.cmp { display: grid; grid-template-columns: minmax(150px, 1fr) repeat(2, minmax(120px, 1fr)); border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden; }
+.cmp > div { padding: 7px 10px; border-bottom: 1px solid var(--line-2); font-size: 12.5px; }
+.cmp > div.h { font-weight: 650; background: var(--inset); }
+.cmp > div.k { color: var(--ink-2); }
+.cmp > div.v { font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.cmp > div.cur { background: var(--accent-soft); }
+.hyp { columns: 2 340px; column-gap: 28px; }
+.hyp section { break-inside: avoid; margin-bottom: 16px; }
+.hyp dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; font-size: 12.5px; }
+.hyp dt { color: var(--ink-2); }
+.hyp dd { margin: 0; font-family: var(--font-mono); font-size: 12px; text-align: right; }
+.hyp p { margin: 0 0 8px; color: var(--ink-2); font-size: 12.5px; max-width: 70ch; }
+.warnbox { border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; background: var(--inset); color: var(--ink-2); font-size: 12.5px; margin-bottom: 16px; max-width: 90ch; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: var(--r); font-size: 13px; z-index: 50; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+a { color: var(--accent); }
+
+@media (max-width: 1100px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) {
+  .app { display: flex; flex-direction: column; height: auto; min-height: 100%; }
+  .stage { display: contents; }
+  .bar { order: 0; flex-wrap: wrap; }
+  .viewport { order: 1; height: 64vh; min-height: 340px; }
+  .params { order: 2; border-right: 0; border-bottom: 1px solid var(--line); overflow: visible; }
+  .dock { order: 3; min-height: 60vh; }
+  .panes { overflow: visible; }
+  .hud-tl .kf { min-width: 0; padding: 6px 9px; }
+  .kf b { font-size: 14px; }
+  .hud-br { display: none; }
+  .hud-bl { right: 12px; }
+  .chipbar { flex-wrap: wrap; }
+  .disp-toggle { display: inline-block; }
+  .hud-bl:not(.open) .chipbar { display: none; }
+  .hud-tr { top: auto; bottom: 12px; right: 12px; left: 110px; }
+  .hud-tr .chipbar { margin-left: auto; }
+  .viewport:has(.hud-bl.open) .hud-tr { display: none; }
+}
+@media (max-width: 480px) {
+  .hud-tl .kf:nth-child(n+4) { display: none; }
+  .bar .brand span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<div class="app" id="app">
+  <header class="bar">
+    <div class="brand">
+      <svg width="38" height="26" viewBox="0 0 38 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M2 23 L19 3 L36 23 Z"/><path d="M10.5 23 V13 M19 23 V3 M27.5 23 V13 M10.5 13 L19 23 L27.5 13"/></svg>
+      <div><strong>Atelier Treillis</strong><span>Fermes paramétriques — outil pédagogique de prédimensionnement</span></div>
+    </div>
+    <button class="verdict" id="verdict" type="button" data-s="ok" title="Voir le diagnostic"><i class="dot"></i><span id="verdict-txt">Calcul…</span><small id="verdict-sub"></small></button>
+  </header>
+
+  <aside class="params" id="params" aria-label="Paramètres de la structure"></aside>
+
+  <main class="stage">
+    <div class="viewport" id="viewport">
+      <div class="hud hud-tl" id="hud"></div>
+      <div class="hud hud-tr" id="views"></div>
+      <div class="hud hud-bl" id="display"></div>
+      <div class="hud hud-br" id="legend"></div>
+      <div class="tip" id="tip" hidden></div>
+      <div class="gl-error" id="gl-error" hidden>La vue 3D n’a pas pu démarrer (WebGL indisponible ou bibliothèque three.js non chargée). Les calculs et les onglets restent utilisables.</div>
+    </div>
+    <section class="dock" aria-label="Analyse">
+      <nav class="tabs" role="tablist" id="tabs"></nav>
+      <div class="panes" id="panes"></div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/renderers/CSS2DRenderer.js"></script>
+<script>
+/* js/catalogue.js */
+/* Atelier Treillis — catalogues de sections
+   Acier : IPE / HEA (EN 10365), tubes carrés SHS et ronds CHS finis à chaud (EN 10210), ronds pleins filetés.
+   Bois  : C24 (EN 338), GL24h / GL28h (EN 14080).
+   Unités internes : mm, mm², mm⁴, mm³, kg/m. */
+(function (G) {
+  'use strict';
+  const PS = G.PS = G.PS || {};
+  const PI = Math.PI;
+
+  const STEEL = { E: 210000, G: 81000, rho: 7850 };
+  const GRADES = {
+    S235: { key: 'S235', fy: 235, fu: 360 },
+    S275: { key: 'S275', fy: 275, fu: 430 },
+    S355: { key: 'S355', fy: 355, fu: 490 },
+  };
+  const TIMBER = {
+    C24:   { key: 'C24',   label: 'C24 — bois massif',      fmk: 24, ft0k: 14.5, fc0k: 21, E0mean: 11000, E005: 7400,  rhok: 350, rhomean: 420, gM: 1.30, betac: 0.2, kdef: 0.6 },
+    GL24h: { key: 'GL24h', label: 'GL24h — lamellé-collé',  fmk: 24, ft0k: 19.2, fc0k: 24, E0mean: 11500, E005: 9600,  rhok: 385, rhomean: 420, gM: 1.25, betac: 0.1, kdef: 0.6 },
+    GL28h: { key: 'GL28h', label: 'GL28h — lamellé-collé',  fmk: 28, ft0k: 22.3, fc0k: 28, E0mean: 12600, E005: 10500, rhok: 425, rhomean: 460, gM: 1.25, betac: 0.1, kdef: 0.6 },
+  };
+
+  const num = (v) => String(v).replace('.', ',');
+
+  /* ---------- Tubes carrés finis à chaud (rayons EN 10210 : ro = 1,5 t, ri = t) ---------- */
+  function shs(b, t) {
+    const ro = 1.5 * t, ri = t, bi = b - 2 * t, k = 4 - PI;
+    const dO = b / 2 - 0.2234 * ro, dI = b / 2 - t - 0.2234 * ri;
+    const A = b * b - bi * bi - k * (ro * ro - ri * ri);
+    const I = (b ** 4 - bi ** 4) / 12 - k * (ro * ro * dO * dO - ri * ri * dI * dI);
+    const Wpl = (b ** 3 - bi ** 3) / 4 - k * (ro * ro * dO - ri * ri * dI);
+    const i = Math.sqrt(I / A);
+    return {
+      key: `SHS ${b}×${num(t)}`, label: `□ ${b}×${num(t)}`, fam: 'SHS', mat: 'steel',
+      shape: { type: 'SHS', b, t, ro, ri }, h: b, b, t,
+      A, Iy: I, Iz: I, iy: i, iz: i, Wely: I / (b / 2), Wply: Wpl, Wplz: Wpl,
+      mass: A * 1e-6 * STEEL.rho, perim: (4 * b - (8 - 2 * PI) * ro) / 1000,
+      curve: { y: 'a', z: 'a' }, slim: (b - 3 * t) / t, slimType: 'box',
+    };
+  }
+
+  /* ---------- Tubes ronds ---------- */
+  function chs(D, t) {
+    const d = D - 2 * t;
+    const A = PI / 4 * (D * D - d * d);
+    const I = PI / 64 * (D ** 4 - d ** 4);
+    const i = Math.sqrt(I / A);
+    return {
+      key: `CHS ${num(D)}×${num(t)}`, label: `○ ${num(D)}×${num(t)}`, fam: 'CHS', mat: 'steel',
+      shape: { type: 'CHS', D, t }, h: D, b: D, t,
+      A, Iy: I, Iz: I, iy: i, iz: i, Wely: I / (D / 2), Wply: (D ** 3 - d ** 3) / 6, Wplz: (D ** 3 - d ** 3) / 6,
+      mass: A * 1e-6 * STEEL.rho, perim: PI * D / 1000,
+      curve: { y: 'a', z: 'a' }, slim: D / t, slimType: 'tube',
+    };
+  }
+
+  /* ---------- Profilés en I laminés (congés inclus) ---------- */
+  function ish(fam, name, h, b, tw, tf, r) {
+    const af = (1 - PI / 4) * r * r;            // aire d'un congé
+    const dy = h / 2 - tf - 0.2234 * r;         // bras de levier d'un congé (axe fort)
+    const dz = tw / 2 + 0.2234 * r;             // bras de levier d'un congé (axe faible)
+    const hw = h - 2 * tf;
+    const A = 2 * b * tf + hw * tw + 4 * af;
+    const Iy = (b * h ** 3 - (b - tw) * hw ** 3) / 12 + 4 * af * dy * dy;
+    const Iz = (2 * tf * b ** 3 + hw * tw ** 3) / 12 + 4 * af * dz * dz;
+    const Wply = b * tf * (h - tf) + tw * hw * hw / 4 + 4 * af * dy;
+    const Wplz = tf * b * b / 2 + hw * tw * tw / 4 + 4 * af * dz;
+    // Inertie de torsion avec correction des congés (formule usuelle des profils laminés)
+    const al = -0.042 + 0.2204 * tw / tf + 0.1355 * r / tf - 0.0865 * r * tw / (tf * tf) - 0.0725 * tw * tw / (tf * tf);
+    const D = ((tf + r) ** 2 + tw * (r + tw / 4)) / (2 * r + tf);
+    const It = 2 / 3 * b * tf ** 3 + 1 / 3 * hw * tw ** 3 + 2 * al * D ** 4 - 0.63 * tf ** 4;
+    const Iw = Iz * (h - tf) ** 2 / 4;
+    const rolledH = h / b > 1.2;
+    return {
+      key: `${fam} ${name}`, label: `${fam} ${name}`, fam, mat: 'steel',
+      shape: { type: 'I', h, b, tw, tf, r }, h, b, tw, tf, r,
+      A, Iy, Iz, iy: Math.sqrt(Iy / A), iz: Math.sqrt(Iz / A), Wely: Iy / (h / 2), Wply, Wplz, It, Iw,
+      mass: A * 1e-6 * STEEL.rho, perim: (2 * h + 4 * b - 2 * tw) / 1000,
+      curve: rolledH ? { y: 'a', z: 'b' } : { y: 'b', z: 'c' },
+      flangeSlim: (b - tw - 2 * r) / 2 / tf, webSlim: (h - 2 * tf - 2 * r) / tw, slimType: 'I',
+    };
+  }
+
+  /* ---------- Ronds pleins filetés (tirants de contreventement) ---------- */
+  const AS = { 12: 84.3, 16: 157, 20: 245, 24: 353, 27: 459, 30: 561, 36: 817, 42: 1120 };
+  function rod(d) {
+    const A = PI * d * d / 4, I = PI * d ** 4 / 64;
+    return {
+      key: `Ø${d}`, label: `Ø ${d} (M${d})`, fam: 'ROD', mat: 'steel',
+      shape: { type: 'ROD', d }, h: d, b: d, A, As: AS[d], Iy: I, Iz: I, iy: d / 4, iz: d / 4,
+      Wely: PI * d ** 3 / 32, Wply: d ** 3 / 6, mass: A * 1e-6 * STEEL.rho, perim: PI * d / 1000,
+      curve: { y: 'c', z: 'c' }, slimType: 'rod',
+    };
+  }
+
+  const SHS_DATA = [
+    [40, 3], [40, 4], [50, 3], [50, 4], [50, 5], [60, 3], [60, 4], [60, 5], [70, 4], [70, 5],
+    [80, 4], [80, 5], [80, 6.3], [90, 5], [90, 6.3], [100, 4], [100, 5], [100, 6.3], [100, 8],
+    [120, 5], [120, 6.3], [120, 8], [120, 10], [140, 5], [140, 6.3], [140, 8], [140, 10],
+    [150, 6.3], [150, 8], [150, 10], [160, 6.3], [160, 8], [160, 10], [180, 8], [180, 10], [180, 12.5],
+    [200, 8], [200, 10], [200, 12.5], [220, 10], [220, 12.5], [250, 10], [250, 12.5], [260, 10],
+    [260, 12.5], [300, 10], [300, 12.5], [300, 16], [350, 12.5], [350, 16], [400, 12.5], [400, 16],
+  ];
+  const CHS_DATA = [
+    [33.7, 3.2], [42.4, 3.2], [48.3, 3.2], [48.3, 4], [60.3, 3.2], [60.3, 4], [76.1, 3.2], [76.1, 4],
+    [76.1, 5], [88.9, 3.2], [88.9, 4], [88.9, 5], [88.9, 6.3], [101.6, 4], [101.6, 5], [101.6, 6.3],
+    [114.3, 4], [114.3, 5], [114.3, 6.3], [139.7, 5], [139.7, 6.3], [139.7, 8], [168.3, 5], [168.3, 6.3],
+    [168.3, 8], [168.3, 10], [193.7, 6.3], [193.7, 8], [193.7, 10], [219.1, 6.3], [219.1, 8], [219.1, 10],
+    [219.1, 12.5], [244.5, 8], [244.5, 10], [273, 8], [273, 10], [273, 12.5], [323.9, 10], [323.9, 12.5],
+    [355.6, 10], [355.6, 12.5], [406.4, 10], [406.4, 12.5], [457, 12.5], [508, 12.5],
+  ];
+  const IPE_DATA = [
+    ['80', 80, 46, 3.8, 5.2, 5], ['100', 100, 55, 4.1, 5.7, 7], ['120', 120, 64, 4.4, 6.3, 7],
+    ['140', 140, 73, 4.7, 6.9, 7], ['160', 160, 82, 5.0, 7.4, 9], ['180', 180, 91, 5.3, 8.0, 9],
+    ['200', 200, 100, 5.6, 8.5, 12], ['220', 220, 110, 5.9, 9.2, 12], ['240', 240, 120, 6.2, 9.8, 15],
+    ['270', 270, 135, 6.6, 10.2, 15], ['300', 300, 150, 7.1, 10.7, 15], ['330', 330, 160, 7.5, 11.5, 18],
+    ['360', 360, 170, 8.0, 12.7, 18], ['400', 400, 180, 8.6, 13.5, 21], ['450', 450, 190, 9.4, 14.6, 21],
+    ['500', 500, 200, 10.2, 16.0, 21], ['550', 550, 210, 11.1, 17.2, 24], ['600', 600, 220, 12.0, 19.0, 24],
+  ];
+  const HEA_DATA = [
+    ['100', 96, 100, 5, 8, 12], ['120', 114, 120, 5, 8, 12], ['140', 133, 140, 5.5, 8.5, 12],
+    ['160', 152, 160, 6, 9, 15], ['180', 171, 180, 6, 9.5, 15], ['200', 190, 200, 6.5, 10, 18],
+    ['220', 210, 220, 7, 11, 18], ['240', 230, 240, 7.5, 12, 21], ['260', 250, 260, 7.5, 12.5, 24],
+    ['280', 270, 280, 8, 13, 24], ['300', 290, 300, 8.5, 14, 27], ['320', 310, 300, 9, 15.5, 27],
+    ['340', 330, 300, 9.5, 16.5, 27], ['360', 350, 300, 10, 17.5, 27], ['400', 390, 300, 11, 19, 27],
+    ['450', 440, 300, 11.5, 21, 27], ['500', 490, 300, 12, 23, 27], ['550', 540, 300, 12.5, 24, 27],
+    ['600', 590, 300, 13, 25, 27],
+  ];
+
+  const byMass = (a, b) => a.mass - b.mass;
+  const steel = {
+    SHS: SHS_DATA.map(([b, t]) => shs(b, t)).sort(byMass),
+    CHS: CHS_DATA.map(([D, t]) => chs(D, t)).sort(byMass),
+    IPE: IPE_DATA.map((d) => ish('IPE', ...d)),
+    HEA: HEA_DATA.map((d) => ish('HEA', ...d)),
+    ROD: [12, 16, 20, 24, 27, 30, 36, 42].map(rod),
+  };
+
+  /* Classe de section ≤ 3 en compression pure (EC3 tableau 5.2) */
+  function compOK(s, fy) {
+    const eps = Math.sqrt(235 / fy);
+    if (s.slimType === 'box') return s.slim <= 42 * eps;
+    if (s.slimType === 'tube') return s.slim <= 90 * eps * eps;
+    if (s.slimType === 'I') return s.flangeSlim <= 14 * eps && s.webSlim <= 42 * eps;
+    return true;
+  }
+
+  /* ---------- Bois : sections rectangulaires ---------- */
+  const timberCache = {};
+  function timberLists(key) {
+    if (timberCache[key]) return timberCache[key];
+    const tg = TIMBER[key];
+    const glulam = key.startsWith('GL');
+    const make = (b, h) => {
+      const A = b * h;
+      return {
+        key: `${tg.key} ${b}×${h}`, label: `${tg.key} ${b}×${h}`, fam: glulam ? 'GL' : 'BM', mat: 'timber',
+        shape: { type: 'RECT', b, h }, b, h, A,
+        Iy: b * h ** 3 / 12, Iz: h * b ** 3 / 12, iy: h / Math.sqrt(12), iz: b / Math.sqrt(12),
+        Wely: b * h * h / 6, Welz: h * b * b / 6, mass: A * 1e-6 * tg.rhomean, perim: 2 * (b + h) / 1000,
+      };
+    };
+    const widths = glulam ? [90, 115, 140, 160, 185, 210, 240, 265, 300] : [63, 75, 100, 120, 150, 175, 200];
+    const heights = glulam ? Array.from({ length: 38 }, (_, i) => 120 + 40 * i) : [75, 100, 120, 150, 175, 200, 225, 250, 275, 300];
+    const all = [];
+    for (const b of widths) {
+      if (glulam || true) all.push(make(b, b));
+      for (const h of heights) if (h > b) all.push(make(b, h));
+    }
+    const pick = (fn) => all.filter(fn).sort(byMass);
+    // barres de ferme : largeur minimale pour loger les assemblages (plats en âme + broches)
+    const out = {
+      truss: pick((s) => s.h / s.b <= 2.01 && s.b >= (glulam ? 115 : 75)),
+      column: pick((s) => s.h / s.b <= 4.01 && s.b >= (glulam ? 115 : 100)),
+      purlin: pick((s) => s.h / s.b <= 5.01 && s.h >= s.b),
+    };
+    timberCache[key] = out;
+    return out;
+  }
+
+  PS.cat = { STEEL, GRADES, TIMBER, steel, compOK, timberLists };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* js/fem.js */
+/* Atelier Treillis — solveur linéaire 2D (méthode des déplacements)
+   Éléments « bar » (treillis articulé, effort normal seul) et « beam » (poutre d'Euler-Bernoulli).
+   Unités cohérentes : kN, m. Effort normal N > 0 = traction. */
+(function (G) {
+  'use strict';
+  const PS = G.PS = G.PS || {};
+
+  /**
+   * model = { nodes:[{x,y}], elems:[{i,j,type:'bar'|'beam',E,A,I}], supports:[{n,ux,uy,rz}] }
+   * cases = { name: Float64Array(3*nNodes) [fx,fy,mz par nœud] }
+   * → { ok, error?, disp:{name:Float64Array(3n)}, N:{name:Float64Array(ne)}, M1/M2:{name:Float64Array(ne)} (moments d'extrémité, repère local) }
+   */
+  function solve(model, cases) {
+    const { nodes, elems, supports } = model;
+    const nn = nodes.length, ne = elems.length;
+    const hasRot = new Uint8Array(nn);
+    for (const e of elems) if (e.type === 'beam') { hasRot[e.i] = 1; hasRot[e.j] = 1; }
+
+    const dof = new Int32Array(3 * nn).fill(-1);
+    let nd = 0;
+    for (let k = 0; k < nn; k++) {
+      dof[3 * k] = nd++; dof[3 * k + 1] = nd++;
+      if (hasRot[k]) dof[3 * k + 2] = nd++;
+    }
+    const fixed = new Uint8Array(nd);
+    for (const s of supports) {
+      if (s.ux) fixed[dof[3 * s.n]] = 1;
+      if (s.uy) fixed[dof[3 * s.n + 1]] = 1;
+      if (s.rz && dof[3 * s.n + 2] >= 0) fixed[dof[3 * s.n + 2]] = 1;
+    }
+    const map = new Int32Array(nd).fill(-1);
+    let nf = 0;
+    for (let d = 0; d < nd; d++) if (!fixed[d]) map[d] = nf++;
+
+    const K = new Float64Array(nf * nf);
+    const geo = new Array(ne);
+
+    for (let q = 0; q < ne; q++) {
+      const e = elems[q];
+      const n1 = nodes[e.i], n2 = nodes[e.j];
+      const dx = n2.x - n1.x, dy = n2.y - n1.y;
+      const L = Math.hypot(dx, dy), c = dx / L, s = dy / L;
+      let ids, ke, m;
+      if (e.type === 'bar') {
+        ids = [dof[3 * e.i], dof[3 * e.i + 1], dof[3 * e.j], dof[3 * e.j + 1]];
+        const k = e.E * e.A / L, cc = c * c * k, ss = s * s * k, cs = c * s * k;
+        ke = [cc, cs, -cc, -cs, cs, ss, -cs, -ss, -cc, -cs, cc, cs, -cs, -ss, cs, ss];
+        m = 4;
+      } else {
+        ids = [dof[3 * e.i], dof[3 * e.i + 1], dof[3 * e.i + 2], dof[3 * e.j], dof[3 * e.j + 1], dof[3 * e.j + 2]];
+        const kl = beamLocal(e.E, e.A, e.I, L);
+        const T = rot6(c, s);
+        ke = mulTtKT(T, kl);
+        m = 6;
+      }
+      geo[q] = { ids, L, c, s };
+      for (let a = 0; a < m; a++) {
+        const ga = map[ids[a]];
+        if (ga < 0) continue;
+        for (let b = 0; b < m; b++) {
+          const gb = map[ids[b]];
+          if (gb < 0) continue;
+          K[ga * nf + gb] += ke[a * m + b];
+        }
+      }
+    }
+
+    // Factorisation de Cholesky (K symétrique définie positive si la structure est stable)
+    let dmax = 0;
+    for (let i = 0; i < nf; i++) dmax = Math.max(dmax, K[i * nf + i]);
+    const tol = 1e-11 * dmax;
+    for (let j = 0; j < nf; j++) {
+      let sum = K[j * nf + j];
+      const rj = j * nf;
+      for (let k = 0; k < j; k++) sum -= K[rj + k] * K[rj + k];
+      if (!(sum > tol)) return { ok: false, error: 'mécanisme : la structure n\'est pas stable' };
+      const Ljj = Math.sqrt(sum);
+      K[rj + j] = Ljj;
+      for (let i = j + 1; i < nf; i++) {
+        const ri = i * nf;
+        let v = K[ri + j];
+        for (let k = 0; k < j; k++) v -= K[ri + k] * K[rj + k];
+        K[ri + j] = v / Ljj;
+      }
+    }
+
+    const out = { ok: true, disp: {}, N: {}, M1: {}, M2: {} };
+    const y = new Float64Array(nf);
+    for (const name in cases) {
+      const F = cases[name];
+      const b = new Float64Array(nf);
+      for (let k = 0; k < nn; k++) {
+        for (let r = 0; r < 3; r++) {
+          const d = dof[3 * k + r];
+          if (d >= 0 && map[d] >= 0) b[map[d]] += F[3 * k + r];
+        }
+      }
+      // descente / remontée
+      for (let i = 0; i < nf; i++) {
+        let v = b[i];
+        const ri = i * nf;
+        for (let k = 0; k < i; k++) v -= K[ri + k] * y[k];
+        y[i] = v / K[ri + i];
+      }
+      const x = new Float64Array(nf);
+      for (let i = nf - 1; i >= 0; i--) {
+        let v = y[i];
+        for (let k = i + 1; k < nf; k++) v -= K[k * nf + i] * x[k];
+        x[i] = v / K[i * nf + i];
+      }
+      const U = new Float64Array(3 * nn);
+      const full = new Float64Array(nd);
+      for (let d = 0; d < nd; d++) full[d] = map[d] >= 0 ? x[map[d]] : 0;
+      for (let k = 0; k < nn; k++) for (let r = 0; r < 3; r++) { const d = dof[3 * k + r]; U[3 * k + r] = d >= 0 ? full[d] : 0; }
+      out.disp[name] = U;
+
+      const Nn = new Float64Array(ne), M1 = new Float64Array(ne), M2 = new Float64Array(ne);
+      for (let q = 0; q < ne; q++) {
+        const e = elems[q], g = geo[q];
+        if (e.type === 'bar') {
+          const du = (full[g.ids[2]] - full[g.ids[0]]) * g.c + (full[g.ids[3]] - full[g.ids[1]]) * g.s;
+          Nn[q] = e.E * e.A / g.L * du;
+        } else {
+          const ug = g.ids.map((d) => full[d]);
+          const ul = [
+            g.c * ug[0] + g.s * ug[1], -g.s * ug[0] + g.c * ug[1], ug[2],
+            g.c * ug[3] + g.s * ug[4], -g.s * ug[3] + g.c * ug[4], ug[5],
+          ];
+          const kl = beamLocal(e.E, e.A, e.I, g.L);
+          const f = new Array(6).fill(0);
+          for (let a = 0; a < 6; a++) for (let bb = 0; bb < 6; bb++) f[a] += kl[a * 6 + bb] * ul[bb];
+          Nn[q] = -f[0];
+          M1[q] = f[2];
+          M2[q] = f[5];
+        }
+      }
+      out.N[name] = Nn;
+      out.M1[name] = M1;
+      out.M2[name] = M2;
+    }
+    return out;
+  }
+
+  function beamLocal(E, A, I, L) {
+    const a = E * A / L, b = 12 * E * I / L ** 3, c = 6 * E * I / L ** 2, d = 4 * E * I / L, h = 2 * E * I / L;
+    return [
+      a, 0, 0, -a, 0, 0,
+      0, b, c, 0, -b, c,
+      0, c, d, 0, -c, h,
+      -a, 0, 0, a, 0, 0,
+      0, -b, -c, 0, b, -c,
+      0, c, h, 0, -c, d,
+    ];
+  }
+  function rot6(c, s) {
+    const T = new Array(36).fill(0);
+    for (const o of [0, 3]) {
+      T[(o) * 6 + o] = c; T[(o) * 6 + o + 1] = s;
+      T[(o + 1) * 6 + o] = -s; T[(o + 1) * 6 + o + 1] = c;
+      T[(o + 2) * 6 + o + 2] = 1;
+    }
+    return T;
+  }
+  function mulTtKT(T, K) {
+    const KT = new Array(36).fill(0), R = new Array(36).fill(0);
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) { let v = 0; for (let k = 0; k < 6; k++) v += K[i * 6 + k] * T[k * 6 + j]; KT[i * 6 + j] = v; }
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 6; j++) { let v = 0; for (let k = 0; k < 6; k++) v += T[k * 6 + i] * KT[k * 6 + j]; R[i * 6 + j] = v; }
+    return R;
+  }
+
+  PS.fem = { solve };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* js/model.js */
+/* Atelier Treillis — modèle paramétrique : géométrie de la ferme, trame du bâtiment, charges climatiques.
+   Repère 2D de la ferme : x le long de la portée (0 → l), y vers le haut (0 = sous-face de la membrure inférieure
+   = tête de poteau). Repère 3D : x transversal, y vertical, z longitudinal. Unités : m, kN. */
+(function (G) {
+  'use strict';
+  const PS = G.PS = G.PS || {};
+
+  PS.DEFAULTS = {
+    typo: 'duo', pattern: 'pratt', material: 'steel', roofing: 'zinc',
+    span: 16, length: 36, colH: 5, trussH: 3.2, aboutH: 0, flatSlope: 5,
+    bayTarget: 6, panelsAuto: true, panels: 8, tieSpacing: 4,
+    steelGrade: 'S355', trussFamily: 'SHS', colFamily: 'HEA', timberGrade: 'GL24h',
+    snowRegion: 'A2', altitude: 200, windRegion: 2, terrain: 'IIIa',
+  };
+
+  PS.ROOFING = {
+    zinc: {
+      key: 'zinc', label: 'Zinc à joint debout', g: 0.30, minSlope: 0.05, purlinMax: 2.5, deflRatio: 200,
+      desc: 'zinc 0,65 mm sur voligeage bois 27 mm, pare-vapeur',
+    },
+    glass: {
+      key: 'glass', label: 'Verrière', g: 0.50, minSlope: 0.10, purlinMax: 1.8, deflRatio: 300,
+      desc: 'double vitrage feuilleté 8/16/44.2 sur serreurs aluminium',
+    },
+  };
+
+  PS.SNOW = { A1: 0.45, A2: 0.45, B1: 0.55, B2: 0.55, C1: 0.65, C2: 0.65, D: 0.90, E: 1.40 };
+  PS.WIND_VB = { 1: 22, 2: 24, 3: 26, 4: 28 };
+  PS.TERRAIN = {
+    '0': { z0: 0.005, zmin: 1, label: '0 — mer, lacs' },
+    II: { z0: 0.05, zmin: 2, label: 'II — rase campagne' },
+    IIIa: { z0: 0.2, zmin: 5, label: 'IIIa — bocage, habitat dispersé' },
+    IIIb: { z0: 0.5, zmin: 9, label: 'IIIb — zones urbanisées, forêts' },
+    IV: { z0: 1.0, zmin: 15, label: 'IV — centre-ville dense' },
+  };
+
+  /* ---------------- Forme de la toiture ---------------- */
+  function roofShape(P) {
+    const l = P.span;
+    let ha, hr, twoSided;
+    if (P.typo === 'duo') { hr = P.trussH; ha = Math.min(Math.max(0, P.aboutH), hr - 0.05); twoSided = true; }
+    else if (P.typo === 'mono') { hr = P.trussH; ha = Math.min(Math.max(0, P.aboutH), hr - 0.05); twoSided = false; }
+    else { const s = Math.max(0, P.flatSlope) / 100; ha = P.trussH; hr = P.trussH + s * l / 2; twoSided = s > 1e-6; }
+    const f = (x) => {
+      if (P.typo === 'mono') return ha + (hr - ha) * x / l;
+      if (!twoSided) return ha;
+      return ha + (hr - ha) * (1 - Math.abs(2 * x / l - 1));
+    };
+    const slope = P.typo === 'mono' ? (hr - ha) / l : twoSided ? (hr - ha) / (l / 2) : 0;
+    return { f, ha, hr, twoSided, slope, alpha: Math.atan(slope), hmax: Math.max(ha, hr) };
+  }
+
+  /* ---------------- Ferme 2D pour n panneaux ---------------- */
+  function buildTruss(P, shape, n) {
+    const l = P.span, dx = l / n;
+    const nodes = [], B = [], T = [];
+    for (let i = 0; i <= n; i++) { B.push(nodes.length); nodes.push({ x: i * dx, y: 0, kind: 'B', i }); }
+    for (let i = 0; i <= n; i++) {
+      const y = shape.f(i * dx);
+      if (y < 1e-6) T.push(B[i]);
+      else { T.push(nodes.length); nodes.push({ x: i * dx, y, kind: 'T', i }); }
+    }
+    const members = [], seen = new Set();
+    const add = (a, b, g, i) => {
+      if (a === b) return;
+      const key = a < b ? a * 4096 + b : b * 4096 + a;
+      if (seen.has(key)) return;
+      seen.add(key);
+      members.push({ a, b, g, i });
+    };
+    for (let i = 0; i < n; i++) add(B[i], B[i + 1], 'bot', i);
+    for (let i = 0; i < n; i++) add(T[i], T[i + 1], 'top', i);
+    for (let i = 0; i <= n; i++) if (T[i] !== B[i]) add(B[i], T[i], 'vert', i);
+    // Orientation des diagonales. Pratt : diagonales TENDUES sous charge de toiture uniforme ; Howe : COMPRIMÉES.
+    // Le sens géométrique qui donne ce comportement dépend de la forme : on coupe le panneau et on écrit
+    // l'équilibre des moments autour du point de concours des deux membrures (méthode de Ritter).
+    // Ferme triangulaire : ce point est l'appui, les diagonales « montent » vers le faîtage ;
+    // membrures parallèles : il est à l'infini, c'est l'effort tranchant qui décide.
+    const yT = (i) => nodes[T[i]].y;
+    const Pn = (i) => (i === 0 || i === n ? dx / 2 : dx);
+    const R0 = l / 2;
+    let sumP = 0, sumPx = 0;
+    for (let k = 0; k < n; k++) {
+      sumP += Pn(k); sumPx += Pn(k) * k * dx;
+      const left = (k + 0.5) * dx < l / 2 - 1e-9;
+      const yk = yT(k), yk1 = yT(k + 1), dyk = yk1 - yk, xk = k * dx, xk1 = xk + dx;
+      let descTension;
+      if (Math.abs(dyk) < 1e-9) descTension = R0 - sumP > 0;
+      else {
+        const xp = xk - yk * dx / dyk;
+        const M = -xp * R0 - (sumPx - xp * sumP);
+        const mDesc = -yk * (xk1 - xp), mAsc = yk1 * (xk - xp);
+        descTension = Math.abs(M) < 1e-9 ? left : (mDesc !== 0 ? mDesc * -M > 0 : !(mAsc * -M > 0));
+      }
+      let desc; // true : T_k → B_k+1 (« \ »), false : B_k → T_k+1 (« / »)
+      if (P.pattern === 'howe') desc = !descTension;
+      else if (P.pattern === 'warren') {
+        const m = left ? k : n - 1 - k;
+        desc = left ? m % 2 === 1 : m % 2 === 0;
+      } else desc = descTension;
+      if (desc) add(T[k], B[k + 1], 'diag', k); else add(B[k], T[k + 1], 'diag', k);
+    }
+    for (const m of members) {
+      const a = nodes[m.a], b = nodes[m.b];
+      m.L = Math.hypot(b.x - a.x, b.y - a.y);
+      m.ang = Math.atan2(Math.abs(b.y - a.y), Math.abs(b.x - a.x)) * 180 / Math.PI;
+    }
+    const topPanels = [];
+    for (let k = 0; k < n; k++) {
+      const a = nodes[T[k]], b = nodes[T[k + 1]];
+      const len = Math.hypot(b.x - a.x, b.y - a.y);
+      topPanels.push({ k, a: T[k], b: T[k + 1], len, dx, dy: b.y - a.y, side: shape.twoSided ? ((k + 0.5) * dx < l / 2 ? 'L' : 'R') : 'S' });
+    }
+    const diagAngles = members.filter((m) => m.g === 'diag').map((m) => m.ang);
+    return { n, dx, nodes, members, B, T, topPanels, diagAngles };
+  }
+
+  /* Découpage automatique : pannes aux nœuds, diagonales proches de 45°, peu de barres */
+  function choosePanels(P, shape) {
+    const R = PS.ROOFING[P.roofing];
+    const even = shape.twoSided;
+    let best = null;
+    for (let n = even ? 4 : 2; n <= 40; n += even ? 2 : 1) {
+      const t = buildTruss(P, shape, n);
+      const lp = Math.max(...t.topPanels.map((p) => p.len));
+      let cost = 0.35 * n;
+      if (lp > R.purlinMax) cost += 60 + 200 * (lp - R.purlinMax);
+      for (const a of t.diagAngles) {
+        if (a > 60) cost += 0.02 * (a - 60) ** 2;
+        if (a < 30) cost += 0.01 * (30 - a) ** 2;
+      }
+      if (!best || cost < best.cost) best = { n, cost };
+    }
+    return best.n;
+  }
+
+  /* ---------------- Géométrie complète ---------------- */
+  PS.buildGeometry = function (P) {
+    const shape = roofShape(P);
+    let n = P.panelsAuto ? choosePanels(P, shape) : Math.max(2, Math.round(P.panels));
+    if (shape.twoSided && n % 2) n += 1;
+    if (shape.twoSided) n = Math.max(4, n);
+    const truss = buildTruss(P, shape, n);
+    const R = PS.ROOFING[P.roofing];
+
+    // Pannes : à chaque nœud de membrure supérieure (+ pannes intermédiaires si panneau trop long)
+    const nodes = truss.nodes;
+    const purlins = [];
+    const panelSub = truss.topPanels.map((p) => Math.max(1, Math.ceil(p.len / R.purlinMax - 1e-9)));
+    for (let k = 0; k <= n; k++) {
+      const nd = nodes[truss.T[k]];
+      purlins.push({ x: nd.x, y: nd.y, k, atNode: true });
+      if (k < n && panelSub[k] > 1) {
+        const p = truss.topPanels[k], a = nodes[p.a];
+        for (let j = 1; j < panelSub[k]; j++) {
+          const t = j / panelSub[k];
+          purlins.push({ x: a.x + t * p.dx, y: a.y + t * p.dy, k, atNode: false });
+        }
+      }
+    }
+    purlins.sort((a, b) => a.x - b.x);
+    // largeur tributaire (le long du rampant) et normale au plan de couverture
+    const tp = truss.topPanels;
+    const panelAt = (x) => tp[Math.min(n - 1, Math.max(0, Math.floor(x / truss.dx + 1e-9)))];
+    for (let j = 0; j < purlins.length; j++) {
+      const p = purlins[j];
+      const prev = purlins[j - 1], next = purlins[j + 1];
+      const d = (q) => q ? Math.hypot(q.x - p.x, q.y - p.y) : 0;
+      p.trib = (d(prev) + d(next)) / 2;
+      const nrm = (panel) => { const L = panel.len; return [-panel.dy / L, panel.dx / L]; };
+      const nL = p.x > 1e-9 ? nrm(panelAt(p.x - 1e-6)) : null;
+      const nR = p.x < P.span - 1e-9 ? nrm(panelAt(p.x + 1e-6)) : null;
+      let nx = (nL ? nL[0] : 0) + (nR ? nR[0] : 0), ny = (nL ? nL[1] : 0) + (nR ? nR[1] : 0);
+      const nl = Math.hypot(nx, ny) || 1; p.nx = nx / nl; p.ny = ny / nl;
+    }
+    const lpMax = Math.max(...tp.map((p) => p.len));
+
+    // Filants de membrure inférieure (maintiens hors plan)
+    const kb = Math.max(1, Math.round(P.tieSpacing / truss.dx));
+    const tieSet = new Set();
+    for (let i = kb; i < n; i += kb) { tieSet.add(i); tieSet.add(n - i); }
+    const ties = [...tieSet].filter((i) => i > 0 && i < n).sort((a, b) => a - b);
+    const restr = [0, ...ties, n];
+
+    // Trame longitudinale (logique du tutoriel : arrondi du nombre de travées puis entraxe recalculé)
+    const nBays = Math.max(1, Math.round(P.length / P.bayTarget));
+    const e = P.length / nBays;
+    const braced = new Set([0, nBays - 1]);
+    if (P.length > 60 && nBays >= 5) braced.add(Math.floor(nBays / 2));
+
+    // Contreventement de toiture : croix par groupe de panneaux, rampant par rampant
+    const planes = shape.twoSided ? [[0, n / 2], [n / 2, n]] : [[0, n]];
+    const roofGroups = [];
+    for (const [i0, i1] of planes) {
+      const len = Math.hypot(nodes[truss.T[i1]].x - nodes[truss.T[i0]].x, nodes[truss.T[i1]].y - nodes[truss.T[i0]].y);
+      const g = Math.max(1, Math.min(i1 - i0, Math.round(len / e)));
+      let prev = i0;
+      for (let j = 1; j <= g; j++) {
+        const b = j === g ? i1 : Math.round(i0 + j * (i1 - i0) / g);
+        if (b > prev) { roofGroups.push([prev, b]); prev = b; }
+      }
+    }
+    const wallLevels = Math.max(1, Math.round(P.colH / e));
+
+    return {
+      shape, truss, n, purlins, panelSub, lpMax, ties, restr, kb,
+      nBays, e, nFrames: nBays + 1, braced: [...braced].sort((a, b) => a - b), roofGroups, wallLevels, roofing: R,
+    };
+  };
+
+  /* ---------------- Charges climatiques (NF EN 1991-1-3 / 1-4, annexes françaises, simplifié) ---------------- */
+  function snowSk(region, A) {
+    let s = PS.SNOW[region];
+    if (A > 200) {
+      if (region === 'E') s += A <= 500 ? 1.5 * A / 1000 - 0.30 : A <= 1000 ? 3.5 * A / 1000 - 1.30 : 7 * A / 1000 - 4.80;
+      else s += A <= 500 ? A / 1000 - 0.20 : A <= 1000 ? 1.5 * A / 1000 - 0.45 : 3.5 * A / 1000 - 2.45;
+    }
+    return s;
+  }
+  function mu1(alphaDeg) {
+    if (alphaDeg <= 30) return 0.8;
+    if (alphaDeg < 60) return 0.8 * (60 - alphaDeg) / 30;
+    return 0;
+  }
+  function qpeak(region, terrain, z) {
+    const vb = PS.WIND_VB[region], T = PS.TERRAIN[terrain];
+    const zz = Math.max(z, T.zmin);
+    const kr = 0.19 * Math.pow(T.z0 / 0.05, 0.07);
+    const lnz = Math.log(zz / T.z0);
+    const vm = kr * lnz * vb;
+    const kl = 1 - 2e-4 * Math.pow(Math.log10(T.z0) + 3, 6);
+    const Iv = kl / lnz;
+    return { qp: (1 + 7 * Iv) * 0.5 * 1.225 * vm * vm / 1000, vb, z: zz, Iv, vm };
+  }
+  const interp = (tab, a) => {
+    if (a <= tab[0][0]) return tab[0][1];
+    for (let i = 1; i < tab.length; i++) if (a <= tab[i][0]) {
+      const [a0, v0] = tab[i - 1], [a1, v1] = tab[i];
+      return v0 + (v1 - v0) * (a - a0) / (a1 - a0);
+    }
+    return tab[tab.length - 1][1];
+  };
+  const CPE = {
+    duoH_suc: [[5, -0.6], [15, -0.3], [30, -0.2], [45, 0.0], [60, 0.7], [75, 0.8]],
+    duoH_pre: [[5, 0.0], [15, 0.2], [30, 0.4], [45, 0.6], [60, 0.7], [75, 0.8]],
+    duoI: [[5, -0.6], [15, -0.4], [30, -0.4], [45, -0.2], [60, -0.2], [75, -0.2]],
+    monoH180: [[5, -0.8], [15, -0.9], [30, -0.8], [45, -0.7], [60, -0.5], [75, -0.5]],
+  };
+
+  PS.loadParams = function (P, geo) {
+    const sk = snowSk(P.snowRegion, P.altitude);
+    const aDeg = geo.shape.alpha * 180 / Math.PI;
+    const m1 = mu1(aDeg);
+    const H = P.colH + geo.shape.hmax;
+    const wind = qpeak(P.windRegion, P.terrain, H);
+    const hd = H / P.span;
+    const t = Math.min(1, Math.max(0, (hd - 0.25) / 0.75));
+    const cpeD = 0.7 + 0.1 * t, cpeE = -0.3 - 0.2 * t;
+    // cpe de toiture en fonction de la position x, de la direction du vent et de la variante (soulèvement / pression)
+    const l = P.span, flatLike = aDeg < 5;
+    const roofCpe = (x, fromLeft, variant) => {
+      const windward = fromLeft ? x < l / 2 : x > l / 2;
+      if (flatLike) return windward ? -0.7 : (variant === 'suc' ? -0.2 : 0.2);
+      if (P.typo === 'mono') {
+        const fromLow = fromLeft; // la toiture monte vers x = l : vent de gauche = vent sur l'égout bas (θ = 0°)
+        if (fromLow) return interp(variant === 'suc' ? CPE.duoH_suc : CPE.duoH_pre, aDeg);
+        return interp(CPE.monoH180, aDeg);
+      }
+      if (windward) return interp(variant === 'suc' ? CPE.duoH_suc : CPE.duoH_pre, aDeg);
+      return interp(CPE.duoI, aDeg);
+    };
+    return {
+      sk, mu1: m1, s: m1 * sk, alphaDeg: aDeg, qp: wind.qp, wind, cpeD, cpeE, hd, roofCpe,
+      cpi: { suc: 0.2, pre: -0.3 }, gRoof: geo.roofing.g,
+    };
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* js/design.js */
+/* Atelier Treillis — prédimensionnement : combinaisons, vérifications EC3 / EC5 simplifiées,
+   choix automatique des profils, diagnostic de constructibilité, métré.
+   Outil pédagogique : ordres de grandeur, ne remplace pas une note de calcul. */
+(function (G) {
+  'use strict';
+  const PS = G.PS = G.PS || {};
+  const GRAV = 9.81e-3;                     // kg → kN
+  const ALPHA = { a0: 0.13, a: 0.21, b: 0.34, c: 0.49, d: 0.76 };
+  const GROUPS = ['top', 'bot', 'vert', 'diag'];
+
+  PS.ROLE_LABEL = {
+    top: 'Membrure supérieure', bot: 'Membrure inférieure', vert: 'Montant', diag: 'Diagonale',
+    col: 'Poteau', purlin: 'Panne', rodRoof: 'Croix de toiture', rodWall: 'Palée de stabilité',
+    strut: 'Buton', tie: 'Filant de membrure inférieure',
+  };
+  PS.GROUP_LABEL = { top: 'Membrure supérieure', bot: 'Membrure inférieure', vert: 'Montants', diag: 'Diagonales', col: 'Poteaux', purlin: 'Pannes' };
+
+  /* ---------------- Outils de vérification ---------------- */
+  function chi(lb, curve) {
+    if (lb <= 0.2) return 1;
+    const a = ALPHA[curve], ph = 0.5 * (1 + a * (lb - 0.2) + lb * lb);
+    return Math.min(1, 1 / (ph + Math.sqrt(ph * ph - lb * lb)));
+  }
+  function kcT(lam, tg) {
+    const lr = lam / Math.PI * Math.sqrt(tg.fc0k / tg.E005);
+    if (lr <= 0.3) return 1;
+    const k = 0.5 * (1 + tg.betac * (lr - 0.3) + lr * lr);
+    return 1 / (k + Math.sqrt(k * k - lr * lr));
+  }
+
+  /* Barre de treillis (effort normal + éventuelle flexion locale de membrure). Nt, Nc ≥ 0 en kN ;
+     pour le bois, efforts déjà divisés par kmod. */
+  function uAxial(ctx, s, Lin, Lout, Nt, Nc, Mloc) {
+    const lamIn = Lin * 1000 / s.iy, lamOut = Lout * 1000 / s.iz, lam = Math.max(lamIn, lamOut);
+    let u, crit;
+    if (ctx.mat.kind === 'steel') {
+      const fy = ctx.mat.fy, NRd = s.A * fy / 1000, l1 = Math.PI * Math.sqrt(210000 / fy);
+      u = Nt / NRd; crit = 'traction';
+      if (Nc > 1e-6) {
+        const c = Math.min(chi(lamIn / l1, s.curve.y), chi(lamOut / l1, s.curve.z));
+        let uc = Nc / (c * NRd);
+        if (Mloc) uc += Mloc * 1e6 / (s.Wply * fy);
+        if (uc > u) { u = uc; crit = Mloc ? 'flambement + flexion' : 'flambement'; }
+        if (lam / 200 > u) { u = lam / 200; crit = 'élancement (λ > 200)'; }
+      } else if (lam / 300 > u) { u = lam / 300; crit = 'élancement (λ > 300)'; }
+    } else {
+      const tg = ctx.mat.tg, ft = tg.ft0k / tg.gM, fc = tg.fc0k / tg.gM, fm = tg.fmk / tg.gM;
+      u = Nt * 1000 / (0.8 * s.A * ft); crit = 'traction (section nette)';
+      if (Nc > 1e-6) {
+        const kc = Math.min(kcT(lamIn, tg), kcT(lamOut, tg));
+        let uc = Nc * 1000 / (s.A * kc * fc);
+        if (Mloc) uc += Mloc * 1e6 / (s.Wely * fm);
+        if (uc > u) { u = uc; crit = Mloc ? 'flambement + flexion' : 'flambement'; }
+        if (lam / 150 > u) { u = lam / 150; crit = 'élancement (λ > 150)'; }
+      } else if (lam / 250 > u) { u = lam / 250; crit = 'élancement (λ > 250)'; }
+    }
+    return { u, crit, lam };
+  }
+
+  /* Poteau encastré en pied, articulé en tête (ferme posée) : compression + flexion */
+  function uColumn(ctx, s, pairs) {
+    const H = ctx.P.colH, Ly = 2 * H, Lz = H;
+    const lamY = Ly * 1000 / s.iy, lamZ = Lz * 1000 / s.iz;
+    let u = 0, crit = 'compression + flexion';
+    if (ctx.mat.kind === 'steel') {
+      const fy = ctx.mat.fy, E = 210000, Gm = 81000, l1 = Math.PI * Math.sqrt(E / fy);
+      const cmin = Math.min(chi(lamY / l1, s.curve.y), chi(lamZ / l1, s.curve.z));
+      const L = H * 1000, C1 = 1.77;
+      const Mcr = C1 * Math.PI ** 2 * E * s.Iz / (L * L) * Math.sqrt(s.Iw / s.Iz + L * L * Gm * s.It / (Math.PI ** 2 * E * s.Iz));
+      const lb = Math.sqrt(s.Wply * fy / Mcr), aLT = s.h / s.b > 2 ? 0.34 : 0.21;
+      const ph = 0.5 * (1 + aLT * (lb - 0.2) + lb * lb);
+      const cLT = lb <= 0.2 ? 1 : Math.min(1, 1 / (ph + Math.sqrt(ph * ph - lb * lb)));
+      const NRd = s.A * fy / 1000, MRd = s.Wply * fy / 1e6;
+      for (const p of pairs) u = Math.max(u, Math.max(0, -p.N) / (cmin * NRd) + Math.abs(p.M) / (cLT * MRd), Math.max(0, p.N) / NRd);
+      const lam = Math.max(lamY, lamZ);
+      if (lam / 200 > u) { u = lam / 200; crit = 'élancement'; }
+    } else {
+      const tg = ctx.mat.tg, kcy = kcT(lamY, tg), kcz = kcT(lamZ, tg);
+      for (const p of pairs) {
+        const fc = p.kmod * tg.fc0k / tg.gM, fm = p.kmod * tg.fmk / tg.gM;
+        const sc = Math.max(0, -p.N) * 1000 / s.A, sm = Math.abs(p.M) * 1e6 / s.Wely;
+        u = Math.max(u, sc / (kcy * fc) + sm / fm, sc / (kcz * fc) + 0.7 * sm / fm);
+      }
+      const lam = Math.max(lamY, lamZ);
+      if (lam / 150 > u) { u = lam / 150; crit = 'élancement'; }
+    }
+    return { u, crit };
+  }
+
+  /* ---------------- Contexte de calcul ---------------- */
+  function combosFor(geo) {
+    const C = [{ id: 'ELU1', label: '1,35 G + 1,5 S', f: { G: 1.35, S: 1.5 }, kmod: 0.9, grav: true }];
+    if (geo.shape.twoSided) C.push({ id: 'ELU2', label: '1,35 G + 1,5 S dissymétrique', f: { G: 1.35, Sa: 1.5 }, kmod: 0.9, grav: true });
+    C.push(
+      { id: 'ELU3g', label: 'G + 1,5 W soulèvement, vent de gauche', f: { G: 1, W1L: 1.5 }, kmod: 0.9 },
+      { id: 'ELU3d', label: 'G + 1,5 W soulèvement, vent de droite', f: { G: 1, W1R: 1.5 }, kmod: 0.9 },
+      { id: 'ELU4g', label: '1,35 G + 1,5 W + 0,75 S, vent de gauche', f: { G: 1.35, W2L: 1.5, S: 0.75 }, kmod: 0.9 },
+      { id: 'ELU4d', label: '1,35 G + 1,5 W + 0,75 S, vent de droite', f: { G: 1.35, W2R: 1.5, S: 0.75 }, kmod: 0.9 },
+      { id: 'ELU5g', label: '1,35 G + 1,5 S + 0,9 W, vent de gauche', f: { G: 1.35, S: 1.5, W2L: 0.9 }, kmod: 0.9, grav: true },
+      { id: 'ELU5d', label: '1,35 G + 1,5 S + 0,9 W, vent de droite', f: { G: 1.35, S: 1.5, W2R: 0.9 }, kmod: 0.9, grav: true },
+      { id: 'ELU0', label: '1,35 G (permanentes seules)', f: { G: 1.35 }, kmod: 0.6, grav: true },
+    );
+    return C;
+  }
+
+  function makeCtx(P, geo) {
+    const lp = PS.loadParams(P, geo);
+    let mat;
+    if (P.material === 'timber') {
+      const tg = PS.cat.TIMBER[P.timberGrade] || PS.cat.TIMBER.GL24h;
+      const L = PS.cat.timberLists(tg.key);
+      mat = { kind: 'timber', tg, E: tg.E0mean, truss: L.truss, column: L.column, purlin: L.purlin, label: tg.label, rho: tg.rhomean };
+    } else {
+      const gr = PS.cat.GRADES[P.steelGrade] || PS.cat.GRADES.S355, fy = gr.fy;
+      const fam = PS.cat.steel[P.trussFamily] || PS.cat.steel.SHS;
+      const col = PS.cat.steel[P.colFamily] || PS.cat.steel.HEA;
+      mat = {
+        kind: 'steel', fy, grade: gr, E: 210000, label: 'Acier ' + gr.key, rho: 7850,
+        truss: fam.filter((s) => PS.cat.compOK(s, fy)), column: col.filter((s) => PS.cat.compOK(s, fy)), purlin: PS.cat.steel.IPE,
+      };
+    }
+    const struts = PS.cat.steel.CHS.filter((s) => PS.cat.compOK(s, 235));
+    return { P, geo, lp, mat, combos: combosFor(geo), struts };
+  }
+
+  /* ---------------- Pannes (isostatiques sur un entraxe) ---------------- */
+  function roofPressures(ctx) {
+    const { P, lp } = ctx;
+    let pMax = 0, pMin = 0;
+    for (const x of [0.05 * P.span, 0.5 * P.span, 0.95 * P.span]) for (const fl of [true, false]) {
+      pMax = Math.max(pMax, lp.qp * (lp.roofCpe(x, fl, 'pre') - lp.cpi.pre));
+      pMin = Math.min(pMin, lp.qp * (lp.roofCpe(x, fl, 'suc') - lp.cpi.suc));
+    }
+    return { pMax, pMin };
+  }
+  function sizePurlins(ctx) {
+    const { geo, lp, mat } = ctx, e = geo.e;
+    const a = Math.max(...geo.purlins.map((p) => p.trib));
+    const ca = Math.cos(geo.shape.alpha);
+    const { pMax, pMin } = roofPressures(ctx);
+    const gc = lp.gRoof * a * ca, sN = lp.s * a * ca * ca;
+    const Ekn = mat.E * 1e3, wLim = e / geo.roofing.deflRatio;
+    let last = null;
+    for (const s of mat.purlin) {
+      const Gq = gc + s.mass * GRAV * ca;
+      const cases = [
+        { q: 1.35 * Gq + 1.5 * sN, kmod: 0.9 },
+        { q: 1.35 * Gq + 1.5 * pMax * a + 0.75 * sN, kmod: 0.9 },
+        { q: 1.35 * Gq + 1.5 * sN + 0.9 * pMax * a, kmod: 0.9 },
+        { q: Gq + 1.5 * pMin * a, kmod: 0.9 },
+        { q: 1.35 * Gq, kmod: 0.6 },
+      ];
+      let u = 0;
+      for (const c of cases) {
+        const M = Math.abs(c.q) * e * e / 8;
+        const MRd = mat.kind === 'steel' ? s.Wply * mat.fy / 1e6 : s.Wely * c.kmod * mat.tg.fmk / mat.tg.gM / 1e6;
+        u = Math.max(u, M / MRd);
+      }
+      const wq = mat.kind === 'steel' ? Gq + sN : Gq * (1 + mat.tg.kdef) + sN;
+      const w = 5 * wq * e ** 4 / (384 * Ekn * s.Iy * 1e-12);
+      last = { sec: s, u, uw: w / wLim, w, wLim, a, crit: u >= w / wLim ? 'flexion' : 'flèche' };
+      if (u <= 1 && w <= wLim) return Object.assign(last, { ok: true, umax: Math.max(u, w / wLim) });
+    }
+    return Object.assign(last, { ok: false, umax: Math.max(last.u, last.uw) });
+  }
+
+  /* ---------------- Modèle aux éléments finis de la file courante ---------------- */
+  function buildFE(ctx, secs) {
+    const { P, geo, mat } = ctx, t = geo.truss, E = mat.E * 1e3;
+    const nodes = t.nodes.map((n) => ({ x: n.x, y: n.y }));
+    const elems = t.members.map((m) => ({ i: m.a, j: m.b, type: 'bar', E, A: secs[m.g].A * 1e-6 }));
+    const nTruss = elems.length, colNodes = [], nc = 4, H = P.colH;
+    for (const top of [t.B[0], t.B[t.n]]) {
+      const x = nodes[top].x, ids = [];
+      for (let k = 0; k < nc; k++) { ids.push(nodes.length); nodes.push({ x, y: -H + k * H / nc }); }
+      ids.push(top);
+      for (let k = 0; k < nc; k++) elems.push({ i: ids[k], j: ids[k + 1], type: 'beam', E, A: secs.col.A * 1e-6, I: secs.col.Iy * 1e-12 });
+      colNodes.push(ids);
+    }
+    const supports = colNodes.map((ids) => ({ n: ids[0], ux: 1, uy: 1, rz: 1 }));
+    return { nodes, elems, supports, nTruss, colNodes };
+  }
+
+  function buildLoads(ctx, fe, secs, purl) {
+    const { P, geo, lp } = ctx, t = geo.truss, e = geo.e, nn = fe.nodes.length;
+    const mk = () => new Float64Array(3 * nn);
+    const C = { G: mk(), S: mk(), W1L: mk(), W1R: mk(), W2L: mk(), W2R: mk() };
+    if (geo.shape.twoSided) C.Sa = mk();
+    const add = (v, n, fx, fy) => { v[3 * n] += fx; v[3 * n + 1] += fy; };
+    for (const m of t.members) {
+      const w = secs[m.g].mass * GRAV * m.L * 1.10;           // +10 % goussets et boulons
+      add(C.G, m.a, 0, -w / 2); add(C.G, m.b, 0, -w / 2);
+    }
+    for (const ids of fe.colNodes) for (let k = 0; k < ids.length - 1; k++) {
+      const w = secs.col.mass * GRAV * (fe.nodes[ids[k + 1]].y - fe.nodes[ids[k]].y);
+      add(C.G, ids[k], 0, -w / 2); add(C.G, ids[k + 1], 0, -w / 2);
+    }
+    const gp = purl.sec.mass * GRAV * e;
+    for (const p of geo.purlins) {
+      if (p.atNode) { add(C.G, t.T[p.k], 0, -gp); continue; }
+      const tt = (p.x - p.k * t.dx) / t.dx;
+      add(C.G, t.T[p.k], 0, -gp * (1 - tt)); add(C.G, t.T[p.k + 1], 0, -gp * tt);
+    }
+    const winds = [['W1L', true, 'suc'], ['W1R', false, 'suc'], ['W2L', true, 'pre'], ['W2R', false, 'pre']];
+    for (const pn of t.topPanels) {
+      const gv = lp.gRoof * pn.len * e, sv = lp.s * pn.dx * e, xm = (pn.k + 0.5) * t.dx;
+      for (const n of [pn.a, pn.b]) {
+        add(C.G, n, 0, -gv / 2);
+        add(C.S, n, 0, -sv / 2);
+        if (C.Sa) add(C.Sa, n, 0, -sv / 2 * (pn.side === 'L' ? 0.5 : 1));
+      }
+      const nx = -pn.dy / pn.len, ny = pn.dx / pn.len;
+      for (const [name, fromLeft, variant] of winds) {
+        const F = lp.qp * (lp.roofCpe(xm, fromLeft, variant) - lp.cpi[variant]) * pn.len * e;
+        add(C[name], pn.a, -nx * F / 2, -ny * F / 2); add(C[name], pn.b, -nx * F / 2, -ny * F / 2);
+      }
+    }
+    const wall = (v, ids, B0, T0, dir, p) => {
+      const w = p * e * dir;
+      for (let k = 0; k < ids.length - 1; k++) {
+        const h = fe.nodes[ids[k + 1]].y - fe.nodes[ids[k]].y;
+        add(v, ids[k], w * h / 2, 0); add(v, ids[k + 1], w * h / 2, 0);
+      }
+      if (T0 !== B0) { const h = fe.nodes[T0].y - fe.nodes[B0].y; add(v, B0, w * h / 2, 0); add(v, T0, w * h / 2, 0); }
+    };
+    for (const [name, fromLeft, variant] of winds) {
+      const cpi = lp.cpi[variant];
+      const pW = lp.qp * (lp.cpeD - cpi), pL = lp.qp * (lp.cpeE - cpi);
+      wall(C[name], fe.colNodes[0], t.B[0], t.T[0], +1, fromLeft ? pW : pL);
+      wall(C[name], fe.colNodes[1], t.B[t.n], t.T[t.n], -1, fromLeft ? pL : pW);
+    }
+    return C;
+  }
+
+  function analyse(ctx, secs, purl) {
+    const fe = buildFE(ctx, secs);
+    const cases = buildLoads(ctx, fe, secs, purl);
+    const res = PS.fem.solve(fe, cases);
+    if (!res.ok) return res;
+    const nT = fe.nTruss, combos = ctx.combos, timber = ctx.mat.kind === 'timber';
+    const Ncombo = combos.map((c) => {
+      const arr = new Float64Array(nT);
+      for (const k in c.f) { const N = res.N[k]; if (N) for (let q = 0; q < nT; q++) arr[q] += c.f[k] * N[q]; }
+      return arr;
+    });
+    const env = [];
+    for (let q = 0; q < nT; q++) {
+      const r = { Nt: 0, Nc: 0, NtK: 0, NcK: 0, ct: -1, cc: -1 };
+      combos.forEach((c, ci) => {
+        const N = Ncombo[ci][q], km = timber ? c.kmod : 1;
+        if (N > r.Nt) { r.Nt = N; r.ct = ci; }
+        if (-N > r.Nc) { r.Nc = -N; r.cc = ci; }
+        r.NtK = Math.max(r.NtK, N / km); r.NcK = Math.max(r.NcK, -N / km);
+      });
+      env.push(r);
+    }
+    const colPairs = [];
+    combos.forEach((c, ci) => {
+      for (let q = nT; q < fe.elems.length; q++) {
+        let N = 0, M1 = 0, M2 = 0;
+        for (const k in c.f) { if (!res.N[k]) continue; N += c.f[k] * res.N[k][q]; M1 += c.f[k] * res.M1[k][q]; M2 += c.f[k] * res.M2[k][q]; }
+        colPairs.push({ N, M: Math.max(Math.abs(M1), Math.abs(M2)), kmod: timber ? c.kmod : 1, ci });
+      }
+    });
+    return { ok: true, fe, cases, res, Ncombo, env, colPairs };
+  }
+
+  /* Longueurs de flambement */
+  function lcr(geo, m) {
+    if (m.g === 'top') return { Lin: m.L, Lout: m.L / geo.panelSub[m.i] };
+    if (m.g === 'bot') {
+      const r = geo.restr;
+      for (let j = 0; j < r.length - 1; j++) if (m.i >= r[j] && m.i < r[j + 1]) return { Lin: m.L, Lout: (r[j + 1] - r[j]) * geo.truss.dx };
+      return { Lin: m.L, Lout: geo.P_span };
+    }
+    return { Lin: m.L, Lout: m.L };
+  }
+
+  /* Flexion locale de membrure supérieure si pannes entre nœuds (charge gravitaire ELU) */
+  function topLocalMoment(ctx, m, purl) {
+    const sub = ctx.geo.panelSub[m.i];
+    if (sub <= 1) return 0;
+    const { lp, geo } = ctx, ca = Math.cos(geo.shape.alpha), Lp = m.L, e = geo.e;
+    const q = 1.35 * (lp.gRoof + purl.sec.mass * GRAV / purl.a) + 1.5 * lp.s * ca;
+    const F = q * (Lp / sub) * e * ca;
+    const coef = sub % 2 === 0 ? sub / 8 : (sub * sub - 1) / (8 * sub);
+    const M = F * Lp * coef;
+    return ctx.mat.kind === 'timber' ? M / 0.9 : M;
+  }
+
+  function memberUtil(ctx, s, m, env, purl) {
+    const L = lcr(ctx.geo, m);
+    const Nt = ctx.mat.kind === 'timber' ? env.NtK : env.Nt;
+    const Nc = ctx.mat.kind === 'timber' ? env.NcK : env.Nc;
+    const Mloc = m.g === 'top' ? topLocalMoment(ctx, m, purl) : 0;
+    return uAxial(ctx, s, L.Lin, L.Lout, Nt, Nc, Mloc);
+  }
+
+  function sizeGroup(ctx, members, envs, minA, purl) {
+    const list = ctx.mat.truss;
+    for (const s of list) {
+      if (s.A < minA - 1e-9) continue;
+      let ok = true, worst = { u: 0 };
+      for (const m of members) {
+        const r = memberUtil(ctx, s, m, envs[m.q], purl);
+        if (r.u > worst.u) worst = Object.assign(r, { q: m.q });
+        if (r.u > 1) { ok = false; break; }
+      }
+      if (ok) return { sec: s, ok: true, worst };
+    }
+    // aucun profil du catalogue ne convient : on retient le plus favorable pour afficher le taux
+    let best = null;
+    for (const s of list) {
+      let worst = { u: 0 };
+      for (const m of members) { const r = memberUtil(ctx, s, m, envs[m.q], purl); if (r.u > worst.u) worst = Object.assign(r, { q: m.q }); }
+      if (!best || worst.u < best.worst.u) best = { sec: s, ok: false, worst };
+    }
+    return best;
+  }
+
+  function sizeColumn(ctx, pairs, minI) {
+    let best = null;
+    for (const s of ctx.mat.column) {
+      if (s.Iy < minI - 1e-9) continue;
+      const r = uColumn(ctx, s, pairs);
+      if (r.u <= 1) return { sec: s, ok: true, u: r.u, crit: r.crit };
+      if (!best || r.u < best.u) best = { sec: s, ok: false, u: r.u, crit: r.crit };
+    }
+    return best || { sec: ctx.mat.column[ctx.mat.column.length - 1], ok: false, u: 9, crit: 'hors catalogue' };
+  }
+
+  function serviceability(ctx, an) {
+    const { P, geo, mat } = ctx, t = geo.truss, d = an.res.disp;
+    const kdef = mat.kind === 'timber' ? mat.tg.kdef : 0;
+    const refG = (d.G[3 * t.B[0] + 1] + d.G[3 * t.B[t.n] + 1]) / 2;
+    const refS = (d.S[3 * t.B[0] + 1] + d.S[3 * t.B[t.n] + 1]) / 2;
+    let defl = 0;
+    for (let k = 0; k < t.nodes.length; k++) {
+      const w = -((d.G[3 * k + 1] - refG) * (1 + kdef) + (d.S[3 * k + 1] - refS));
+      if (w > defl) defl = w;
+    }
+    let drift = 0;
+    for (const name of ['W2L', 'W2R', 'W1L', 'W1R']) {
+      for (const n of [t.B[0], t.B[t.n]]) drift = Math.max(drift, Math.abs(d[name][3 * n] + d.G[3 * n]));
+    }
+    return { defl, deflLim: P.span / geo.roofing.deflRatio, drift, driftLim: P.colH / 150 };
+  }
+
+  /* ---------------- Stabilité d'ensemble : contreventements, butons, filants ---------------- */
+  function pickRod(N) {
+    let last = null;
+    for (const s of PS.cat.steel.ROD) {
+      const NRd = Math.min(s.A * 235, 0.9 * s.As * 360 / 1.25) / 1000;
+      last = { sec: s, N, NRd, u: N / NRd };
+      if (N <= NRd) return Object.assign(last, { ok: true });
+    }
+    return Object.assign(last, { ok: false });
+  }
+  function pickStrut(ctx, N, L) {
+    const sctx = { mat: { kind: 'steel', fy: 235 } };
+    let last = null;
+    for (const s of ctx.struts) {
+      const r = uAxial(sctx, s, L, L, 0, Math.max(N, 0.01));
+      last = { sec: s, N, u: r.u, crit: r.crit };
+      if (r.u <= 1) return Object.assign(last, { ok: true });
+    }
+    return Object.assign(last, { ok: false });
+  }
+  function gableAvgH(ctx) {
+    const { P, geo } = ctx; let s = 0; const k = 40;
+    for (let i = 0; i <= k; i++) s += geo.shape.f(P.span * i / k) * (i === 0 || i === k ? 0.5 : 1);
+    return s / k;
+  }
+  function sizeStability(ctx, an) {
+    const { P, geo, lp } = ctx, t = geo.truss, e = geo.e;
+    const Hg = P.colH + gableAvgH(ctx);
+    const w = lp.qp * (lp.cpeD + 0.3) * Hg / 2;          // kN/m sur la poutre au vent (moitié haute du pignon)
+    const V = 1.5 * w * P.span / 2;                        // effort tranchant d'appui = réaction transmise à chaque long-pan
+    let maxLd = 0;
+    for (const [a, b] of geo.roofGroups) {
+      const na = t.nodes[t.T[a]], nb = t.nodes[t.T[b]];
+      maxLd = Math.max(maxLd, Math.hypot(Math.hypot(nb.x - na.x, nb.y - na.y), e));
+    }
+    const rodRoof = pickRod(V * maxLd / e);
+    const hLev = P.colH / geo.wallLevels, LdW = Math.hypot(hLev, e);
+    const rodWall = pickRod(V * LdW / e);
+    const strut = pickStrut(ctx, V, e);
+    let Nb = 0;
+    t.members.forEach((m, q) => { if (m.g === 'bot') Nb = Math.max(Nb, an.env[q].Nc, 0.5 * an.env[q].Nt); });
+    const tie = pickStrut(ctx, Math.max(1, 0.025 * Nb), e);
+    return { w, V, Hg, rodRoof, rodWall, strut, tie, LdW, maxLd };
+  }
+
+  /* ---------------- Métré de base (masse, utilisé aussi pour la carte des limites) ---------------- */
+  function quantities(ctx, secs, purl, stab) {
+    const { P, geo } = ctx, t = geo.truss, nF = geo.nFrames, e = geo.e;
+    let trussMass = 0, trussLen = 0;
+    for (const m of t.members) { trussMass += secs[m.g].mass * m.L; trussLen += m.L; }
+    const q = {};
+    q.truss = trussMass * nF;
+    q.connections = 0.10 * q.truss;
+    q.cols = 2 * nF * P.colH * secs.col.mass;
+    q.purlins = geo.purlins.length * P.length * purl.sec.mass;
+    let roofRodLen = 0;
+    for (const [a, b] of geo.roofGroups) {
+      const na = t.nodes[t.T[a]], nb = t.nodes[t.T[b]];
+      roofRodLen += 2 * Math.hypot(Math.hypot(nb.x - na.x, nb.y - na.y), e);
+    }
+    const nBr = geo.braced.length;
+    q.rodRoof = roofRodLen * nBr * stab.rodRoof.sec.mass;
+    q.rodWall = 2 * nBr * geo.wallLevels * 2 * stab.LdW * stab.rodWall.sec.mass;
+    const eaveStruts = (t.T[0] === t.B[0] ? 0 : 1) + (t.T[t.n] === t.B[t.n] ? 0 : 1);
+    q.struts = (eaveStruts * P.length + 2 * nBr * (geo.wallLevels - 1) * e) * stab.strut.sec.mass;
+    q.ties = geo.ties.length * P.length * stab.tie.sec.mass;
+    q.total = q.truss + q.connections + q.cols + q.purlins + q.rodRoof + q.rodWall + q.struts + q.ties;
+    q.area = P.span * P.length;
+    q.perM2 = q.total / q.area;
+    q.trussUnit = trussMass * 1.10;
+    q.trussLen = trussLen;
+    return q;
+  }
+
+  /* ---------------- Diagnostic ---------------- */
+  const fmt = (v, d = 2) => (Math.round(v * 10 ** d) / 10 ** d).toFixed(d).replace('.', ',');
+  function diagnose(ctx, R) {
+    const { P, geo, mat } = ctx, out = [];
+    const push = (id, status, title, value, explain) => out.push({ id, status, title, value, explain });
+    const timber = mat.kind === 'timber';
+
+    // Pente et couverture
+    const sl = geo.shape.slope, minS = geo.roofing.minSlope;
+    push('pente', sl >= minS - 1e-9 ? 'ok' : 'bad', 'Pente de couverture',
+      `${fmt(sl * 100, 1)} % (${fmt(geo.shape.alpha * 180 / Math.PI, 1)}°) — minimum ${geo.roofing.label.toLowerCase()} : ${fmt(minS * 100, 0)} %`,
+      sl >= minS - 1e-9
+        ? 'La pente suffit pour évacuer l’eau avec cette couverture.'
+        : P.typo === 'flat'
+          ? 'Une poutre treillis parfaitement plate ne convient ni au zinc ni au verre : l’eau stagne. Donnez une pente de forme à la membrure supérieure.'
+          : 'Sous la pente minimale, l’eau stagne et les recouvrements ne sont plus étanches. Augmentez la hauteur de la ferme.');
+
+    // Proportions
+    const depth = P.typo === 'flat' ? P.trussH : geo.shape.hmax;
+    const ratio = P.span / depth;
+    const lim = P.typo === 'flat' ? [15, 25] : [8, 16];
+    push('proportion', ratio <= lim[0] ? 'ok' : ratio <= lim[1] ? 'warn' : 'bad', 'Proportion portée / hauteur',
+      `l / h = ${fmt(ratio, 1)} (${P.typo === 'flat' ? 'usuel ≤ 15' : 'usuel ≤ 8'})`,
+      'Les membrures forment un couple qui équilibre le moment de flexion : l’effort vaut environ M / h. Une ferme deux fois plus basse porte des efforts deux fois plus grands dans ses membrures.');
+
+    // Angles des diagonales
+    const ang = geo.truss.diagAngles;
+    if (ang.length) {
+      const amin = Math.min(...ang), amax = Math.max(...ang);
+      push('angles', amin >= 20 && amax <= 65 ? 'ok' : 'warn', 'Inclinaison des diagonales',
+        `de ${fmt(amin, 0)}° à ${fmt(amax, 0)}° (idéal 35° à 55°, acceptable 20° à 65°)`,
+        'Une diagonale trop couchée transmet l’effort tranchant avec un grand effort normal ; trop redressée, elle devient longue et les nœuds se resserrent. Autour de 45°, le treillis travaille le mieux.');
+    }
+
+    // Pannes aux nœuds
+    const pm = geo.roofing.purlinMax;
+    push('pannes', geo.lpMax <= pm + 1e-9 ? 'ok' : 'warn', 'Pannes posées aux nœuds',
+      `panneau de ${fmt(geo.lpMax, 2)} m pour ${fmt(pm, 1)} m admissibles (${geo.roofing.label.toLowerCase()})`,
+      geo.lpMax <= pm + 1e-9
+        ? 'Chaque panne repose sur un nœud : la membrure supérieure ne travaille qu’en effort normal.'
+        : 'Des pannes intermédiaires tombent entre deux nœuds : la membrure supérieure fléchit en plus d’être comprimée, il faut la renforcer. Augmentez le nombre de panneaux.');
+
+    // Résistance des barres
+    if (R.error) {
+      push('resistance', 'bad', 'Stabilité de la ferme', R.error, 'Le modèle ne trouve pas d’équilibre stable.');
+    } else {
+      const fails = [];
+      let umax = 0, gov = '';
+      for (const g of [...GROUPS, 'col']) {
+        const s = R.sizing[g]; if (!s) continue;
+        const u = g === 'col' ? s.u : s.worst.u;
+        if (!s.ok) fails.push(PS.GROUP_LABEL[g]);
+        if (u > umax) { umax = u; gov = `${PS.GROUP_LABEL[g].toLowerCase()}, ${g === 'col' ? s.crit : s.worst.crit}`; }
+      }
+      push('resistance', fails.length ? 'bad' : 'ok', 'Résistance des barres',
+        fails.length ? `aucun profil du catalogue ne suffit : ${fails.join(', ').toLowerCase()}` : `taux maximal ${fmt(umax * 100, 0)} % (${gov})`,
+        fails.length
+          ? 'Les efforts dépassent ce que peut reprendre le plus fort profil du catalogue. Réduisez la portée ou l’entraxe, ou augmentez la hauteur de la ferme.'
+          : 'Chaque groupe de barres reçoit le profil le plus léger qui résiste à toutes les combinaisons de charges (traction, flambement, élancement).');
+    }
+
+    // Flèche
+    if (R.sls) {
+      const okD = R.sls.defl <= R.sls.deflLim * 1.0001;
+      push('fleche', okD ? 'ok' : 'bad', 'Flèche de la ferme',
+        `${fmt(R.sls.defl * 1000, 0)} mm pour l / ${geo.roofing.deflRatio} = ${fmt(R.sls.deflLim * 1000, 0)} mm${timber ? ' (fluage inclus)' : ''}`,
+        okD ? `Les membrures ont été renforcées si nécessaire pour limiter la déformation${P.roofing === 'glass' ? ' — le verre exige une structure plus raide' : ''}.`
+          : 'Même avec les plus fortes membrures, la ferme se déforme trop. Augmentez sa hauteur.');
+      const okH = R.sls.drift <= R.sls.driftLim * 1.0001;
+      push('tete', okH ? 'ok' : 'bad', 'Déplacement en tête de poteau',
+        `${fmt(R.sls.drift * 1000, 0)} mm sous vent pour H / 150 = ${fmt(R.sls.driftLim * 1000, 0)} mm`,
+        'Les poteaux encastrés en pied reprennent seuls le vent transversal (ferme articulée en tête) : leur raideur fixe le déplacement horizontal.');
+    }
+
+    // Pannes
+    if (R.purl) {
+      push('entraxe', !R.purl.ok ? 'bad' : geo.e > (timber ? 6.5 : 8) ? 'warn' : 'ok', 'Portée des pannes',
+        `entraxe ${fmt(geo.e, 2)} m → ${R.purl.sec.label}${R.purl.ok ? '' : ' insuffisant'}`,
+        'Les pannes franchissent l’entraxe entre fermes. Doubler l’entraxe multiplie leur moment par 4 et leur flèche par 16.');
+    }
+
+    // Contreventement
+    if (R.stab) {
+      const ok = R.stab.rodRoof.ok && R.stab.rodWall.ok && R.stab.strut.ok;
+      push('stabilite', ok ? 'ok' : 'warn', 'Contreventement',
+        `croix ${R.stab.rodRoof.sec.label} en toiture, ${R.stab.rodWall.sec.label} en long-pan`,
+        'Le vent sur les pignons est ramené par la poutre au vent de toiture (travées d’extrémité) vers les palées de stabilité des long-pans, puis aux fondations.');
+    }
+
+    // Transport
+    const chordH = R.secs ? R.secs.top.h / 1000 : 0.1;
+    const Ht = geo.shape.hmax + chordH;
+    const pieces = Math.ceil(P.span / 12 - 1e-9);
+    push('transport', Ht <= 4.0 ? 'ok' : 'warn', 'Transport et montage',
+      `ferme de ${fmt(Ht, 2)} m de haut, ${pieces > 1 ? `livrée en ${pieces} tronçons éclissés (barres ≤ 12 m)` : 'livrée d’une pièce'}`,
+      Ht <= 2.55
+        ? 'La ferme couchée tient dans le gabarit routier (2,55 m de large).'
+        : Ht <= 4.0
+          ? 'Trop haute pour voyager à plat (2,55 m) : transport debout sur remorque surbaissée, ou demi-fermes assemblées au sol sur le chantier.'
+          : 'Au-delà de 4 m de haut : convoi exceptionnel, ou livraison en éléments assemblés sur chantier avant levage.');
+
+    // Portée typique
+    const pr = timber ? [30, 45] : [40, 60];
+    push('portee', P.span <= pr[0] ? 'ok' : 'warn', 'Domaine d’emploi',
+      `portée ${fmt(P.span, 1)} m (${timber ? 'bois' : 'acier'} : courant jusqu’à ${pr[0]} m)`,
+      'Au-delà, on passe à d’autres systèmes : fermes à membrures parallèles de grande hauteur, arcs, structures tendues.');
+
+    // Longueur
+    if (!timber) push('dilatation', P.length <= 60 ? 'ok' : 'warn', 'Dilatation thermique',
+      `longueur ${fmt(P.length, 1)} m (joint de dilatation au-delà de 50 à 60 m)`,
+      'L’acier s’allonge d’environ 0,6 mm par mètre pour 50 °C d’écart : un long bâtiment se fractionne par des joints.');
+
+    // Masse
+    if (R.qty) {
+      const m2 = R.qty.perM2;
+      push('masse', m2 <= 35 ? 'ok' : m2 <= 70 ? 'warn' : 'bad', 'Économie de matière',
+        `${fmt(m2, 1)} kg/m² d’emprise (repère : 15 à 35 kg/m²)`,
+        m2 > 70
+          ? 'La structure pèse plus du double des usages : elle tient, mais au prix de profils démesurés. Ce n’est plus une proposition raisonnable.'
+          : timber ? 'Masse du bois et des pièces métalliques rapportée à la surface couverte.' : 'Une charpente métallique légère de hangar se situe entre 15 et 35 kg/m² d’emprise.');
+    }
+
+    const rank = { ok: 0, warn: 1, bad: 2 };
+    const worst = out.reduce((w, d) => rank[d.status] > rank[w] ? d.status : w, 'ok');
+    return { items: out, verdict: worst };
+  }
+
+  /* ---------------- Calcul principal ---------------- */
+  PS.compute = function (Pin, opts) {
+    opts = opts || {};
+    const P = Object.assign({}, PS.DEFAULTS, Pin);
+    const geo = PS.buildGeometry(P);
+    geo.P_span = P.span;
+    const ctx = makeCtx(P, geo);
+    const t = geo.truss;
+    t.members.forEach((m, q) => { m.q = q; });
+    const groupMembers = { top: [], bot: [], vert: [], diag: [] };
+    for (const m of t.members) groupMembers[m.g].push(m);
+
+    const purl = sizePurlins(ctx);
+    const secs = { top: ctx.mat.truss[0], bot: ctx.mat.truss[0], vert: ctx.mat.truss[0], diag: ctx.mat.truss[0], col: ctx.mat.column[0] };
+    const minA = { top: 0, bot: 0, vert: 0, diag: 0 };
+    let minI = 0, an = null, sizing = {}, sls = null, error = null;
+
+    for (let it = 0; it < 40; it++) {
+      an = analyse(ctx, secs, purl);
+      if (!an.ok) { error = an.error; break; }
+      const next = {};
+      sizing = {};
+      for (const g of GROUPS) {
+        if (!groupMembers[g].length) continue;
+        const r = sizeGroup(ctx, groupMembers[g], an.env, minA[g], purl);
+        next[g] = r.sec; sizing[g] = r;
+      }
+      const rc = sizeColumn(ctx, an.colPairs, minI);
+      next.col = rc.sec; sizing.col = rc;
+      const same = Object.keys(next).every((g) => next[g] === secs[g]);
+      Object.assign(secs, next);
+      // Après quelques itérations, les sections ne peuvent plus que grossir : convergence garantie
+      // (le poids propre et l'hyperstaticité poteaux / ferme peuvent sinon faire osciller le choix).
+      if (it >= 3) {
+        for (const g of GROUPS) if (secs[g]) minA[g] = Math.max(minA[g], secs[g].A);
+        minI = Math.max(minI, secs.col.Iy);
+      }
+      if (!same) continue;
+      sls = serviceability(ctx, an);
+      const anyFail = Object.values(sizing).some((s) => !s.ok);
+      if (anyFail) break;
+      let bumped = false;
+      if (sls.defl > sls.deflLim) {
+        for (const g of ['top', 'bot']) {
+          const cur = secs[g], nx = ctx.mat.truss.find((s) => s.A >= cur.A * 1.15);
+          if (nx) { minA[g] = nx.A; bumped = true; }
+        }
+      }
+      if (sls.drift > sls.driftLim) {
+        const cur = secs.col, nx = ctx.mat.column.find((s) => s.Iy >= cur.Iy * 1.2);
+        if (nx) { minI = nx.Iy; bumped = true; }
+      }
+      if (!bumped) break;
+    }
+
+    const R = { P, geo, ctx, secs, purl, sizing, error, lp: ctx.lp, combos: ctx.combos, material: ctx.mat };
+    if (!error && an && an.ok) {
+      R.an = an;
+      R.sls = sls || serviceability(ctx, an);
+      R.stab = sizeStability(ctx, an);
+      R.qty = quantities(ctx, secs, purl, R.stab);
+      R.members = t.members.map((m) => {
+        const r = memberUtil(ctx, secs[m.g], m, an.env[m.q], purl);
+        const L = lcr(geo, m);
+        return { g: m.g, a: m.a, b: m.b, L: m.L, sec: secs[m.g], env: an.env[m.q], u: r.u, crit: r.crit, lam: r.lam, Lin: L.Lin, Lout: L.Lout };
+      });
+    }
+    R.diag = diagnose(ctx, R);
+    if (!opts.light && !error && R.an) PS.detail(R);
+    return R;
+  };
+
+  /* ---------------- Détail : maquette 3D, assemblages, nomenclature ---------------- */
+  function hull(pts) {
+    const p = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lo = [], up = [];
+    for (const q of p) { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
+    for (let i = p.length - 1; i >= 0; i--) { const q = p[i]; while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
+    up.pop(); lo.pop();
+    return lo.concat(up);
+  }
+  const polyArea = (P) => { let a = 0; for (let i = 0; i < P.length; i++) { const p = P[i], q = P[(i + 1) % P.length]; a += p[0] * q[1] - q[0] * p[1]; } return Math.abs(a) / 2; };
+
+  PS.detail = function (R) {
+    const { P, geo, secs, purl, stab, ctx } = R, t = geo.truss, e = geo.e, l = P.span, L = P.length, H = P.colH;
+    const timber = ctx.mat.kind === 'timber';
+    const nodes = t.nodes;
+    const X = (x) => x - l / 2, Z = (k) => k * e - L / 2;
+    const members = [];
+    const hTop = secs.top.h / 1000, hBot = secs.bot.h / 1000;
+
+    // Directions de membrure supérieure aux nœuds (pour les coupes des barres de treillis)
+    const chordDirAt = (nodeIdx) => {
+      const nd = nodes[nodeIdx];
+      if (nd.kind === 'B' && t.T[nd.i] !== nodeIdx) return [[1, 0], hBot / 2];
+      const k = Math.min(t.n - 1, nd.i), p = t.topPanels[k];
+      return [[p.dx / p.len, p.dy / p.len], hTop / 2];
+    };
+    const trimAt = (nodeIdx, dir, len) => {
+      const [cd, hh] = chordDirAt(nodeIdx);
+      const s = Math.abs(dir[0] * cd[1] - dir[1] * cd[0]);
+      return Math.min(0.35 * len, hh / Math.max(0.15, s));
+    };
+
+    // Ferme type : barres 2D avec leurs résultats
+    const trussBars = R.members.map((mr, q) => {
+      const a = nodes[mr.a], b = nodes[mr.b];
+      const d = [(b.x - a.x) / mr.L, (b.y - a.y) / mr.L];
+      const web = mr.g === 'vert' || mr.g === 'diag';
+      return Object.assign({}, mr, { q, d, up: [-d[1], d[0], 0], t0: web ? trimAt(mr.a, d, mr.L) : 0, t1: web ? trimAt(mr.b, [-d[0], -d[1]], mr.L) : 0 });
+    });
+
+    for (let f = 0; f < geo.nFrames; f++) {
+      const z = Z(f);
+      for (const tb of trussBars) {
+        const a = nodes[tb.a], b = nodes[tb.b];
+        const pa = [X(a.x) + tb.d[0] * tb.t0, H + a.y + tb.d[1] * tb.t0, z];
+        const pb = [X(b.x) - tb.d[0] * tb.t1, H + b.y - tb.d[1] * tb.t1, z];
+        members.push({ role: tb.g, a: pa, b: pb, up: tb.up, sec: tb.sec, bar: tb.q, frame: f, u: tb.u, N: tb.env, crit: tb.crit, L: tb.L });
+      }
+      for (const side of [0, 1]) {
+        const x = side ? X(l) : X(0);
+        members.push({ role: 'col', a: [x, 0, z], b: [x, H - hBot / 2, z], up: [1, 0, 0], sec: secs.col, frame: f, u: R.sizing.col.u, crit: R.sizing.col.crit, L: H });
+      }
+    }
+
+    // Pannes
+    const offP = (hTop / 2 + purl.sec.h / 2000);
+    for (const p of geo.purlins) {
+      for (let b = 0; b < geo.nBays; b++) {
+        members.push({
+          role: 'purlin', a: [X(p.x) + p.nx * offP, H + p.y + p.ny * offP, Z(b)], b: [X(p.x) + p.nx * offP, H + p.y + p.ny * offP, Z(b + 1)],
+          up: [p.nx, p.ny, 0], sec: purl.sec, u: purl.umax, crit: purl.crit, L: e,
+        });
+      }
+    }
+
+    // Contreventements
+    for (const b of geo.braced) {
+      for (const [ia, ib] of geo.roofGroups) {
+        const na = nodes[t.T[ia]], nb = nodes[t.T[ib]];
+        const A0 = [X(na.x), H + na.y, Z(b)], B1 = [X(nb.x), H + nb.y, Z(b + 1)];
+        const B0 = [X(nb.x), H + nb.y, Z(b)], A1 = [X(na.x), H + na.y, Z(b + 1)];
+        members.push({ role: 'rodRoof', a: A0, b: B1, up: [0, 1, 0], sec: stab.rodRoof.sec, u: stab.rodRoof.u, crit: 'traction', L: Math.hypot(...A0.map((v, i) => v - B1[i])) });
+        members.push({ role: 'rodRoof', a: B0, b: A1, up: [0, 1, 0], sec: stab.rodRoof.sec, u: stab.rodRoof.u, crit: 'traction', L: Math.hypot(...B0.map((v, i) => v - A1[i])) });
+      }
+      for (const x of [X(0), X(l)]) {
+        for (let j = 0; j < geo.wallLevels; j++) {
+          const y0 = H * j / geo.wallLevels, y1 = H * (j + 1) / geo.wallLevels;
+          members.push({ role: 'rodWall', a: [x, y0, Z(b)], b: [x, y1, Z(b + 1)], up: [1, 0, 0], sec: stab.rodWall.sec, u: stab.rodWall.u, crit: 'traction', L: stab.LdW });
+          members.push({ role: 'rodWall', a: [x, y1, Z(b)], b: [x, y0, Z(b + 1)], up: [1, 0, 0], sec: stab.rodWall.sec, u: stab.rodWall.u, crit: 'traction', L: stab.LdW });
+          if (j > 0) members.push({ role: 'strut', a: [x, y0, Z(b)], b: [x, y0, Z(b + 1)], up: [0, 1, 0], sec: stab.strut.sec, u: stab.strut.u, crit: stab.strut.crit, L: e });
+        }
+      }
+    }
+    for (const side of [0, 1]) {
+      const i = side ? t.n : 0;
+      if (t.T[i] === t.B[i]) continue;             // la panne sablière joue le rôle de buton
+      for (let b = 0; b < geo.nBays; b++) members.push({ role: 'strut', a: [X(side ? l : 0), H, Z(b)], b: [X(side ? l : 0), H, Z(b + 1)], up: [0, 1, 0], sec: stab.strut.sec, u: stab.strut.u, crit: stab.strut.crit, L: e });
+    }
+    for (const i of geo.ties) {
+      const nd = nodes[t.B[i]];
+      for (let b = 0; b < geo.nBays; b++) members.push({ role: 'tie', a: [X(nd.x), H, Z(b)], b: [X(nd.x), H, Z(b + 1)], up: [0, 1, 0], sec: stab.tie.sec, u: stab.tie.u, crit: stab.tie.crit, L: e });
+    }
+
+    // Goussets (acier : plats soudés/boulonnés ; bois : plats métalliques insérés en âme)
+    const gussets = [];
+    let gussetMass = 0, bolts = 0;
+    const adj = nodes.map(() => []);
+    trussBars.forEach((tb) => { adj[tb.a].push({ tb, dir: tb.d }); adj[tb.b].push({ tb, dir: [-tb.d[0], -tb.d[1]] }); });
+    adj.forEach((list, k) => {
+      if (list.length < 2) return;
+      const nd = nodes[k];
+      const pts = [];
+      let Nmax = 0;
+      for (const { tb, dir } of list) {
+        const hm = tb.sec.h / 1000, web = tb.g === 'vert' || tb.g === 'diag';
+        const along = (web ? hm * 1.6 + 0.08 : hm * 0.9 + 0.05) + (web ? (tb.a === k ? tb.t0 : tb.t1) : 0);
+        const hw = hm / 2 + (timber ? -0.01 : 0.015);
+        const n = [-dir[1], dir[0]];
+        for (const sgn of [-1, 1]) pts.push([nd.x + dir[0] * along + n[0] * hw * sgn, nd.y + dir[1] * along + n[1] * hw * sgn]);
+        pts.push([nd.x + n[0] * hw, nd.y + n[1] * hw], [nd.x - n[0] * hw, nd.y - n[1] * hw]);
+        const Na = Math.max(tb.N ? 0 : 0, tb.env.Nt, tb.env.Nc);
+        Nmax = Math.max(Nmax, Na);
+        bolts += timber ? Math.max(4, Math.ceil(Na / 14)) : Math.max(2, Math.ceil(Na / 60));
+      }
+      const poly = hull(pts);
+      const th = timber ? 0.008 : Nmax < 150 ? 0.008 : Nmax < 300 ? 0.010 : Nmax < 500 ? 0.012 : Nmax < 800 ? 0.015 : 0.020;
+      const area = polyArea(poly);
+      gussets.push({ node: k, poly: poly.map(([x, y]) => [X(x), H + y]), t: th, area, Nmax });
+      gussetMass += area * th * 7850;
+    });
+    gussetMass *= geo.nFrames;
+    bolts *= geo.nFrames;
+
+    // Platines de pied
+    const cs = secs.col;
+    const bpT = timber ? 0.015 : cs.h <= 200 ? 0.020 : cs.h <= 300 ? 0.025 : 0.030;
+    const bp = { w: (cs.h + 150) / 1000, d: (cs.b + 150) / 1000, t: bpT, anchor: cs.h <= 240 ? 'M20' : 'M24' };
+    const basePlates = [];
+    for (let f = 0; f < geo.nFrames; f++) for (const side of [0, 1]) basePlates.push({ x: side ? X(l) : X(0), z: Z(f) });
+    const bpMass = basePlates.length * bp.w * bp.d * bp.t * 7850;
+
+    // Couverture : plans de toiture
+    const offC = hTop / 2 + purl.sec.h / 1000 + 0.02;
+    const planes = geo.shape.twoSided ? [[0, t.n / 2], [t.n / 2, t.n]] : [[0, t.n]];
+    const roofPlanes = planes.map(([i0, i1]) => {
+      const a = nodes[t.T[i0]], b = nodes[t.T[i1]];
+      const len = Math.hypot(b.x - a.x, b.y - a.y), nx = -(b.y - a.y) / len, ny = (b.x - a.x) / len;
+      return { x0: X(a.x) + nx * offC, y0: H + a.y + ny * offC, x1: X(b.x) + nx * offC, y1: H + b.y + ny * offC, nx, ny, len };
+    });
+
+    R.model3d = { members, gussets, basePlates, bp, roofPlanes, trussBars, hTop, hBot };
+
+    // ---------- Nomenclature ----------
+    const rows = [];
+    const nF = geo.nFrames;
+    const addRow = (cat, item, sec, qty, unitLen, note, massOverride) => {
+      const mass = massOverride != null ? massOverride : sec.mass * unitLen * qty;
+      rows.push({ cat, item, profile: sec ? sec.label : '—', qty, unitLen, totalLen: unitLen != null ? unitLen * qty : null, unitMass: sec ? sec.mass : null, mass, note: note || '' });
+    };
+    // membrures continues, découpées en tronçons ≤ 12 m
+    const planeLens = planes.map(([i0, i1]) => { let s = 0; for (let k = i0; k < i1; k++) s += t.topPanels[k].len; return s; });
+    let splices = 0, topPieces = 0;
+    const topByLen = new Map();
+    for (const Lpl of planeLens) {
+      const np = Math.ceil(Lpl / 12 - 1e-9); topPieces += np; splices += np - 1;
+      const k = Math.round(Lpl / np * 100);
+      const cur = topByLen.get(k) || { qty: 0, len: Lpl / np, split: np > 1 };
+      cur.qty += np; topByLen.set(k, cur);
+    }
+    for (const r of topByLen.values()) addRow('Fermes', 'Membrure supérieure', secs.top, r.qty * nF, r.len, r.split ? 'tronçons éclissés' : planeLens.length > 1 ? 'un arbalétrier par versant' : '');
+    const botP = Math.ceil(l / 12 - 1e-9); splices += botP - 1;
+    addRow('Fermes', 'Membrure inférieure', secs.bot, botP * nF, l / botP, botP > 1 ? 'tronçons éclissés' : '');
+    for (const g of ['vert', 'diag']) {
+      const list = trussBars.filter((tb) => tb.g === g);
+      if (!list.length) continue;
+      const tot = list.reduce((s, tb) => s + tb.L, 0);
+      const lens = list.map((tb) => tb.L);
+      addRow('Fermes', g === 'vert' ? 'Montants' : 'Diagonales', secs[g], list.length * nF, tot / list.length,
+        `longueurs de ${fmt(Math.min(...lens), 2)} à ${fmt(Math.max(...lens), 2)} m`);
+    }
+    addRow('Fermes', timber ? 'Plaques métalliques en âme' : 'Goussets', null, gussets.length * nF, null, `épaisseur ${[...new Set(gussets.map((g) => g.t * 1000))].sort((a, b) => a - b).join(' / ')} mm`, gussetMass);
+    if (splices) addRow('Fermes', 'Éclisses de chantier', null, splices * nF, null, '2 plats + 8 boulons', splices * nF * 2 * 0.25 * 0.3 * 0.01 * 7850);
+    addRow('Poteaux', 'Poteaux', secs.col, 2 * nF, H, 'encastrés en pied');
+    addRow('Poteaux', 'Platines de pied', null, basePlates.length, null, `${Math.round(bp.w * 1000)}×${Math.round(bp.d * 1000)}×${Math.round(bp.t * 1000)} mm, 4 tiges ${bp.anchor}`, bpMass);
+    addRow('Couverture', 'Pannes', purl.sec, geo.purlins.length * geo.nBays, e, `${geo.purlins.length} files, isostatiques`);
+    const cnt = (role) => members.filter((m) => m.role === role);
+    const sumLen = (list) => list.reduce((s, m) => s + m.L, 0);
+    const rr = cnt('rodRoof'), rw = cnt('rodWall'), st = cnt('strut'), ti = cnt('tie');
+    if (rr.length) addRow('Stabilité', 'Croix de toiture (poutre au vent)', stab.rodRoof.sec, rr.length, sumLen(rr) / rr.length, 'tirants filetés + tendeurs');
+    if (rw.length) addRow('Stabilité', 'Palées de stabilité (long-pans)', stab.rodWall.sec, rw.length, sumLen(rw) / rw.length, 'tirants filetés + tendeurs');
+    if (st.length) addRow('Stabilité', 'Butons', stab.strut.sec, st.length, e, '');
+    if (ti.length) addRow('Stabilité', 'Filants de membrure inférieure', stab.tie.sec, ti.length, e, '');
+    const boltMass = bolts * (timber ? 0.12 : 0.25);
+    addRow('Assemblages', timber ? 'Broches Ø12 (estimation)' : 'Boulons M16 classe 8.8 (estimation)', null, bolts, null, 'selon l’effort de chaque barre', boltMass);
+
+    const total = rows.reduce((s, r) => s + r.mass, 0);
+    const timberVol = timber ? (rows.filter((r) => r.profile && r.profile.startsWith(ctx.mat.tg.key)).reduce((s, r) => s + r.totalLen * r.unitMass / ctx.mat.tg.rhomean, 0)) : 0;
+    const steelMass = timber ? total - rows.filter((r) => r.profile && r.profile.startsWith(ctx.mat.tg.key)).reduce((s, r) => s + r.mass, 0) : total;
+    // repères distincts (profil + longueur au cm)
+    const marks = new Set();
+    const lenOf = (m) => Math.hypot(m.b[0] - m.a[0], m.b[1] - m.a[1], m.b[2] - m.a[2]);
+    for (const m of members) if (m.role !== 'top' && m.role !== 'bot') marks.add(m.sec.key + '|' + Math.round(lenOf(m) * 100));
+    marks.add('top'); marks.add('bot');
+    const paint = timber ? 0 : members.reduce((s, m) => s + m.sec.perim * lenOf(m), 0);
+    const pieces = rows.filter((r) => r.cat !== 'Assemblages').reduce((s, r) => s + r.qty, 0);
+    R.bom = {
+      rows, total, perM2: total / (l * L), pieces, marks: marks.size, paint, timberVol, steelMass, bolts,
+      heaviest: R.qty.trussUnit + gussetMass / nF, splices, topPieces, botPieces: botP,
+    };
+  };
+
+  PS.fmt = fmt;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* js/view3d.js */
+/* Atelier Treillis — maquette 3D (three.js r147, build UMD)
+   Profilés réels extrudés et instanciés, goussets, platines, couverture zinc / verre,
+   socle de maquette, personnages à l'échelle, cotes. */
+(function (G) {
+  'use strict';
+  const PS = G.PS = G.PS || {};
+  const THREE = G.THREE;
+  if (!THREE) { PS.view3d = null; return; }
+  const V = PS.view3d = {};
+
+  const ROLE_COLORS = {
+    top: '#2B7A73', bot: '#2F64B0', vert: '#7A5BB0', diag: '#D08A2E', col: '#56656B',
+    purlin: '#A07A38', rodRoof: '#C0402E', rodWall: '#C0402E', strut: '#6E8B3D', tie: '#6E8B3D',
+  };
+  const MAT_COLORS = { steel: '#7F8E96', timber: '#C99258', rod: '#3E474C', plate: '#4D585E' };
+
+  let renderer, labelRenderer, scene, camera, controls, container, tip;
+  let root = null, needs = true, lastRadius = 0, lastR = null, lastD = null;
+  let pickables = [];
+  const geoCache = new Map();
+  const tmp = { m: new THREE.Matrix4(), a: new THREE.Vector3(), b: new THREE.Vector3(), ex: new THREE.Vector3(), ey: new THREE.Vector3(), ez: new THREE.Vector3(), c: new THREE.Color() };
+  const mats = {};
+
+  const css = (name, fb) => {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fb;
+  };
+
+  /* ---------------- Initialisation ---------------- */
+  V.init = function (el, tipEl) {
+    container = el; tip = tipEl;
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(2, G.devicePixelRatio || 1));
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.domElement.className = 'gl';
+    container.appendChild(renderer.domElement);
+
+    labelRenderer = new THREE.CSS2DRenderer();
+    labelRenderer.domElement.className = 'labels';
+    container.appendChild(labelRenderer.domElement);
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(30, 1, 0.1, 5000);
+    camera.position.set(-30, 18, -40);
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.09;
+    controls.maxPolarAngle = Math.PI * 0.495;
+    controls.addEventListener('change', () => { needs = true; });
+
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x8a918e, 0.62);
+    scene.add(hemi);
+    const sun = new THREE.DirectionalLight(0xffffff, 0.78);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.bias = -0.0004;
+    sun.shadow.normalBias = 0.02;
+    scene.add(sun, sun.target);
+    V._sun = sun;
+    scene.add(new THREE.AmbientLight(0xffffff, 0.12));
+
+    mats.member = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55, metalness: 0.25 });
+    mats.timber = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85, metalness: 0.0 });
+    mats.plate = new THREE.MeshStandardMaterial({ color: MAT_COLORS.plate, roughness: 0.5, metalness: 0.35 });
+    mats.socleTop = new THREE.MeshStandardMaterial({ roughness: 0.95 });
+    mats.socleSide = new THREE.MeshStandardMaterial({ roughness: 0.95 });
+    mats.slab = new THREE.MeshStandardMaterial({ roughness: 0.9 });
+    mats.figure = new THREE.MeshStandardMaterial({ roughness: 0.9 });
+    mats.zinc = new THREE.MeshStandardMaterial({ color: '#8E989C', roughness: 0.42, metalness: 0.55, side: THREE.DoubleSide });
+    mats.seam = new THREE.MeshStandardMaterial({ color: '#737D82', roughness: 0.4, metalness: 0.6 });
+    mats.glass = new THREE.MeshStandardMaterial({ color: '#BFE3EA', roughness: 0.06, metalness: 0.1, transparent: true, opacity: 0.24, depthWrite: false, side: THREE.DoubleSide });
+    mats.alu = new THREE.MeshStandardMaterial({ color: '#5B6468', roughness: 0.35, metalness: 0.6 });
+    mats.wire = new THREE.LineBasicMaterial({ vertexColors: true });
+    mats.dim = new THREE.LineBasicMaterial({ color: 0x000000 });
+    V.applyTheme();
+
+    new ResizeObserver(resize).observe(container);
+    resize();
+    renderer.domElement.addEventListener('pointermove', onMove);
+    renderer.domElement.addEventListener('pointerleave', () => { tip.hidden = true; });
+    (function loop() {
+      requestAnimationFrame(loop);
+      const moved = controls.update();
+      if (moved || needs) {
+        renderer.render(scene, camera);
+        labelRenderer.render(scene, camera);
+        needs = false;
+      }
+    })();
+  };
+
+  function resize() {
+    const w = container.clientWidth, h = container.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    labelRenderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    needs = true;
+  }
+
+  V.applyTheme = function () {
+    mats.socleTop.color.set(css('--socle-top', '#F1EFEA'));
+    mats.socleSide.color.set(css('--socle-side', '#CFCBC2'));
+    mats.slab.color.set(css('--slab', '#C3C8C5'));
+    mats.figure.color.set(css('--figure', '#FAFAF7'));
+    mats.dim.color.set(css('--ink-2', '#54646A'));
+    needs = true;
+  };
+
+  /* ---------------- Sections ---------------- */
+  function roundRect(p, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    p.moveTo(x + r, y); p.lineTo(x + w - r, y); p.absarc(x + w - r, y + r, r, -Math.PI / 2, 0, false);
+    p.lineTo(x + w, y + h - r); p.absarc(x + w - r, y + h - r, r, 0, Math.PI / 2, false);
+    p.lineTo(x + r, y + h); p.absarc(x + r, y + h - r, r, Math.PI / 2, Math.PI, false);
+    p.lineTo(x, y + r); p.absarc(x + r, y + r, r, Math.PI, 1.5 * Math.PI, false);
+    return p;
+  }
+  function sectionGeometry(sec) {
+    if (geoCache.has(sec.key)) return geoCache.get(sec.key);
+    const s = sec.shape, k = 0.001;
+    let sh, seg = 4;
+    if (s.type === 'I') {
+      const h = s.h * k, b = s.b * k, tw = s.tw * k, tf = s.tf * k;
+      sh = new THREE.Shape();
+      const pts = [[-b / 2, -h / 2], [b / 2, -h / 2], [b / 2, -h / 2 + tf], [tw / 2, -h / 2 + tf], [tw / 2, h / 2 - tf], [b / 2, h / 2 - tf], [b / 2, h / 2],
+        [-b / 2, h / 2], [-b / 2, h / 2 - tf], [-tw / 2, h / 2 - tf], [-tw / 2, -h / 2 + tf], [-b / 2, -h / 2 + tf]];
+      sh.moveTo(...pts[0]); for (let i = 1; i < pts.length; i++) sh.lineTo(...pts[i]); sh.closePath();
+    } else if (s.type === 'SHS') {
+      const b = s.b * k, t = s.t * k;
+      sh = roundRect(new THREE.Shape(), -b / 2, -b / 2, b, b, s.ro * k);
+      sh.holes.push(roundRect(new THREE.Path(), -b / 2 + t, -b / 2 + t, b - 2 * t, b - 2 * t, s.ri * k));
+      seg = 3;
+    } else if (s.type === 'CHS') {
+      const r = s.D * k / 2;
+      sh = new THREE.Shape(); sh.absarc(0, 0, r, 0, Math.PI * 2, false);
+      const hole = new THREE.Path(); hole.absarc(0, 0, r - s.t * k, 0, Math.PI * 2, true); sh.holes.push(hole);
+      seg = 14;
+    } else if (s.type === 'ROD') {
+      sh = new THREE.Shape(); sh.absarc(0, 0, s.d * k / 2, 0, Math.PI * 2, false); seg = 8;
+    } else {
+      const b = s.b * k, h = s.h * k;
+      sh = new THREE.Shape(); sh.moveTo(-b / 2, -h / 2); sh.lineTo(b / 2, -h / 2); sh.lineTo(b / 2, h / 2); sh.lineTo(-b / 2, h / 2); sh.closePath();
+    }
+    const g = new THREE.ExtrudeGeometry(sh, { depth: 1, bevelEnabled: false, curveSegments: seg });
+    geoCache.set(sec.key, g);
+    return g;
+  }
+
+  function setBasis(m4, a, b, up) {
+    tmp.a.set(a[0], a[1], a[2]); tmp.b.set(b[0], b[1], b[2]);
+    tmp.ez.subVectors(tmp.b, tmp.a);
+    const L = tmp.ez.length();
+    tmp.ez.divideScalar(L || 1);
+    tmp.ey.set(up[0], up[1], up[2]);
+    tmp.ey.addScaledVector(tmp.ez, -tmp.ey.dot(tmp.ez));
+    if (tmp.ey.lengthSq() < 1e-8) { tmp.ey.set(0, 1, 0).addScaledVector(tmp.ez, -tmp.ez.y); if (tmp.ey.lengthSq() < 1e-8) tmp.ey.set(1, 0, 0); }
+    tmp.ey.normalize();
+    tmp.ex.crossVectors(tmp.ey, tmp.ez);
+    m4.makeBasis(tmp.ex, tmp.ey, tmp.ez.clone().multiplyScalar(L));
+    m4.setPosition(tmp.a);
+  }
+
+  /* ---------------- Couleurs ---------------- */
+  function utilColor(u, c) {
+    const stops = [[0, '#3E9A62'], [0.6, '#C9B23A'], [0.85, '#E0892E'], [1.0, '#D0402F'], [1.3, '#7A1F2A']];
+    u = Math.max(0, Math.min(1.3, u));
+    for (let i = 1; i < stops.length; i++) if (u <= stops[i][0]) {
+      const [u0, c0] = stops[i - 1], [u1, c1] = stops[i];
+      return c.set(c0).lerp(new THREE.Color(c1), (u - u0) / (u1 - u0));
+    }
+    return c.set(stops[stops.length - 1][1]);
+  }
+  function memberColor(m, D, R, c) {
+    const timber = R.material.kind === 'timber';
+    const woodRole = timber && ['top', 'bot', 'vert', 'diag', 'col', 'purlin'].includes(m.role);
+    if (D.color === 'role') return c.set(ROLE_COLORS[m.role] || '#888');
+    if (D.color === 'util') return utilColor(m.u || 0, c);
+    if (D.color === 'force') {
+      if (!m.N) return c.set(css('--neutral-3d', '#A7B0B3'));
+      const nmax = R.forceMax || 1;
+      const t = m.N.Nt >= m.N.Nc;
+      const v = Math.min(1, (t ? m.N.Nt : m.N.Nc) / nmax);
+      const base = new THREE.Color('#D9DEDD');
+      return c.copy(base).lerp(new THREE.Color(t ? '#2F64B0' : '#C0402E'), 0.25 + 0.75 * Math.sqrt(v));
+    }
+    if (m.role.startsWith('rod')) return c.set(MAT_COLORS.rod);
+    return c.set(woodRole ? MAT_COLORS.timber : MAT_COLORS.steel);
+  }
+
+  /* ---------------- Construction de la scène ---------------- */
+  function disposeRoot() {
+    if (!root) return;
+    root.traverse((o) => {
+      if (o.isCSS2DObject && o.element && o.element.parentNode) o.element.parentNode.removeChild(o.element);
+      if ((o.isMesh || o.isLine || o.isLineSegments || o.isInstancedMesh) && o.geometry && !o.userData.cachedGeo) o.geometry.dispose();
+    });
+    scene.remove(root);
+    root = null;
+  }
+
+  V.update = function (R, D) {
+    lastR = R; lastD = D;
+    disposeRoot();
+    root = new THREE.Group();
+    scene.add(root);
+    pickables = [];
+    if (!R || !R.model3d) { needs = true; return; }
+    const { P } = R, l = P.span, L = P.length, H = P.colH, M = R.model3d;
+    R.forceMax = Math.max(1, ...R.members.map((m) => Math.max(m.env.Nt, m.env.Nc)));
+    const timber = R.material.kind === 'timber';
+
+    // ----- barres
+    if (D.mode === 'wire') {
+      const pos = new Float32Array(M.members.length * 6), col = new Float32Array(M.members.length * 6);
+      M.members.forEach((m, i) => {
+        pos.set(m.a, i * 6); pos.set(m.b, i * 6 + 3);
+        memberColor(m, D, R, tmp.c);
+        col.set([tmp.c.r, tmp.c.g, tmp.c.b, tmp.c.r, tmp.c.g, tmp.c.b], i * 6);
+      });
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+      const lines = new THREE.LineSegments(g, mats.wire);
+      root.add(lines);
+      pickables.push({ obj: lines, kind: 'lines', list: M.members });
+    } else {
+      const groups = new Map();
+      for (const m of M.members) {
+        const woodRole = timber && ['top', 'bot', 'vert', 'diag', 'col', 'purlin'].includes(m.role);
+        const key = m.sec.key + (woodRole ? '|w' : '|s');
+        if (!groups.has(key)) groups.set(key, { sec: m.sec, wood: woodRole, list: [] });
+        groups.get(key).list.push(m);
+      }
+      for (const { sec, wood, list } of groups.values()) {
+        const mesh = new THREE.InstancedMesh(sectionGeometry(sec), wood ? mats.timber : mats.member, list.length);
+        mesh.userData.cachedGeo = true;
+        list.forEach((m, i) => {
+          setBasis(tmp.m, m.a, m.b, m.up);
+          mesh.setMatrixAt(i, tmp.m);
+          mesh.setColorAt(i, memberColor(m, D, R, tmp.c));
+        });
+        mesh.instanceMatrix.needsUpdate = true;
+        if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+        mesh.castShadow = true; mesh.receiveShadow = true;
+        mesh.computeBoundingSphere && mesh.computeBoundingSphere();
+        root.add(mesh);
+        pickables.push({ obj: mesh, kind: 'inst', list });
+      }
+      // goussets
+      if (D.details) {
+        for (const gs of M.gussets) {
+          const sh = new THREE.Shape();
+          sh.moveTo(...gs.poly[0]); for (let i = 1; i < gs.poly.length; i++) sh.lineTo(...gs.poly[i]); sh.closePath();
+          const g = new THREE.ExtrudeGeometry(sh, { depth: gs.t, bevelEnabled: false });
+          const mesh = new THREE.InstancedMesh(g, mats.plate, R.geo.nFrames);
+          for (let f = 0; f < R.geo.nFrames; f++) { tmp.m.makeTranslation(0, 0, f * R.geo.e - L / 2 - gs.t / 2); mesh.setMatrixAt(f, tmp.m); }
+          mesh.castShadow = true;
+          root.add(mesh);
+        }
+        const bp = M.bp;
+        const bpm = new THREE.InstancedMesh(new THREE.BoxGeometry(bp.w, bp.t, bp.d), mats.plate, M.basePlates.length);
+        M.basePlates.forEach((p, i) => { tmp.m.makeTranslation(p.x, bp.t / 2, p.z); bpm.setMatrixAt(i, tmp.m); });
+        bpm.castShadow = true;
+        root.add(bpm);
+      }
+    }
+
+    // ----- couverture
+    if (D.cover !== 'none') buildCover(R, D);
+
+    // ----- socle et dallage
+    const big = Math.max(l, L);
+    const marg = Math.max(4.5, Math.min(12, 0.16 * big));
+    const hs = Math.max(0.5, Math.min(1.4, 0.03 * big));
+    if (D.socle) {
+      const sg = new THREE.BoxGeometry(l + 2 * marg, hs, L + 2 * marg);
+      const socle = new THREE.Mesh(sg, [mats.socleSide, mats.socleSide, mats.socleTop, mats.socleSide, mats.socleSide, mats.socleSide]);
+      socle.position.y = -0.15 - hs / 2;
+      socle.receiveShadow = true;
+      root.add(socle);
+      const slab = new THREE.Mesh(new THREE.BoxGeometry(l + 1.2, 0.15, L + 1.2), mats.slab);
+      slab.position.y = -0.075;
+      slab.receiveShadow = true;
+      root.add(slab);
+    }
+
+    // ----- personnages
+    if (D.people) {
+      const e = R.geo.e;
+      const spots = [
+        { x: -l / 2 - 2.4, z: -L / 2 - 2.6, r: 0.5, h: 1.78, pose: 'stand' },
+        { x: -l / 2 - 1.55, z: -L / 2 - 3.2, r: 0.35, h: 1.22, pose: 'stand' },
+        { x: l * 0.1, z: -L / 2 + Math.min(e * 0.55, L * 0.3), r: Math.PI * 0.95, h: 1.72, pose: 'point' },
+        { x: -l * 0.22, z: L * 0.12, r: 2.2, h: 1.68, pose: 'walk' },
+        { x: l / 2 + 2.9, z: L * 0.22, r: -1.3, h: 1.84, pose: 'walk' },
+      ];
+      for (const s of spots) {
+        const f = makeFigure(s.h, s.pose);
+        f.position.set(s.x, 0, s.z); f.rotation.y = s.r;
+        root.add(f);
+      }
+    }
+
+    // ----- cotes
+    if (D.dims) buildDims(R);
+
+    // r147 : l'élimination hors champ des InstancedMesh se base sur la géométrie d'origine, pas sur les instances
+    root.traverse((o) => { if (o.isInstancedMesh) o.frustumCulled = false; });
+
+    // ----- lumière et cadrage
+    const radius = 0.5 * Math.hypot(l + 2 * marg, L + 2 * marg, H + R.geo.shape.hmax);
+    const sun = V._sun;
+    sun.position.set(-0.55 * radius * 2.2, radius * 2.0, -0.35 * radius * 2.2);
+    sun.target.position.set(0, 0, 0);
+    const sc = sun.shadow.camera;
+    sc.left = -radius * 1.2; sc.right = radius * 1.2; sc.top = radius * 1.2; sc.bottom = -radius * 1.2;
+    sc.near = 0.5; sc.far = radius * 6;
+    sc.updateProjectionMatrix();
+    V._center = new THREE.Vector3(0, (H + R.geo.shape.hmax) * 0.4, 0);
+    V._radius = radius;
+    // vue de détail : nœud d'about gauche de la deuxième ferme, vu de l'intérieur
+    const fd = Math.min(1, R.geo.nFrames - 1), t2 = R.geo.truss;
+    const kD = Math.min(2, t2.n);
+    const nD = t2.nodes[t2.T[kD]], n0 = t2.nodes[t2.B[0]];
+    V._detail = {
+      target: new THREE.Vector3(-l / 2 + (n0.x + nD.x) / 2, H + (n0.y + nD.y) / 2, fd * R.geo.e - L / 2),
+      dist: Math.max(3.2, 1.6 * Math.hypot(nD.x - n0.x, nD.y - n0.y)),
+    };
+    if (!lastRadius || Math.abs(radius - lastRadius) / lastRadius > 0.25) { lastRadius = radius; V.setView(V._view || 'persp', true); }
+    needs = true;
+  };
+
+  function buildCover(R, D) {
+    const { P, model3d: M } = R, L = P.length, glass = P.roofing === 'glass';
+    const z0 = D.cover === 'full' ? -L / 2 : -L / 2 + L * 0.42, z1 = L / 2;
+    const depth = z1 - z0, zc = (z0 + z1) / 2, th = 0.03;
+    for (const pl of M.roofPlanes) {
+      const ang = Math.atan2(pl.y1 - pl.y0, pl.x1 - pl.x0);
+      const len = Math.hypot(pl.x1 - pl.x0, pl.y1 - pl.y0);
+      const cx = (pl.x0 + pl.x1) / 2 + pl.nx * th / 2, cy = (pl.y0 + pl.y1) / 2 + pl.ny * th / 2;
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(len, th, depth), glass ? mats.glass : mats.zinc);
+      panel.position.set(cx, cy, zc); panel.rotation.z = ang;
+      panel.castShadow = !glass; panel.receiveShadow = !glass;
+      if (glass) panel.renderOrder = 2;
+      root.add(panel);
+      // joints debout (zinc) ou serreurs (verre), dans le sens de la pente
+      const step = glass ? 1.2 : 0.53;
+      const n = Math.max(1, Math.floor(depth / step));
+      const rib = glass ? new THREE.BoxGeometry(len, 0.06, 0.05) : new THREE.BoxGeometry(len, 0.035, 0.012);
+      const ribs = new THREE.InstancedMesh(rib, glass ? mats.alu : mats.seam, n + 1);
+      const off = glass ? 0.0 : th / 2 + 0.017;
+      for (let i = 0; i <= n; i++) {
+        const z = z0 + i * depth / n;
+        tmp.m.makeRotationZ(ang);
+        tmp.m.setPosition(cx + pl.nx * off, cy + pl.ny * off, z);
+        ribs.setMatrixAt(i, tmp.m);
+      }
+      ribs.castShadow = true;
+      root.add(ribs);
+    }
+  }
+
+  function label(text, pos, cls) {
+    const div = document.createElement('div');
+    div.className = 'dim-label' + (cls ? ' ' + cls : '');
+    div.textContent = text;
+    const o = new THREE.CSS2DObject(div);
+    o.position.copy(pos);
+    return o;
+  }
+  function buildDims(R) {
+    const { P, geo } = R, l = P.span, L = P.length, H = P.colH, f = PS.fmt;
+    const pts = [], add = (a, b) => pts.push(a.x, a.y, a.z, b.x, b.y, b.z);
+    const v = (x, y, z) => new THREE.Vector3(x, y, z);
+    const tk = 0.35;
+    const dz = -L / 2 - 1.6, dx = -l / 2 - 1.6;
+    add(v(-l / 2, 0.02, dz), v(l / 2, 0.02, dz));
+    add(v(-l / 2, 0.02, dz - tk), v(-l / 2, 0.02, dz + tk)); add(v(l / 2, 0.02, dz - tk), v(l / 2, 0.02, dz + tk));
+    root.add(label(`portée ${f(l)} m`, v(0, 0.02, dz)));
+    add(v(dx, 0.02, -L / 2), v(dx, 0.02, L / 2));
+    for (let k = 0; k <= geo.nBays; k++) { const z = -L / 2 + k * geo.e; add(v(dx - tk * (k % geo.nBays ? 0.5 : 1), 0.02, z), v(dx + tk * (k % geo.nBays ? 0.5 : 1), 0.02, z)); }
+    root.add(label(`longueur ${f(L)} m — ${geo.nBays} × ${f(geo.e)} m`, v(dx, 0.02, 0)));
+    const hx = l / 2 + 1.2, hz = -L / 2;
+    add(v(hx, 0, hz), v(hx, H, hz)); add(v(hx - tk, 0, hz), v(hx + tk, 0, hz)); add(v(hx - tk, H, hz), v(hx + tk, H, hz));
+    root.add(label(`poteaux ${f(H)} m`, v(hx, H / 2, hz)));
+    const t = geo.truss, top = t.nodes.reduce((a, n) => (n.y > a.y ? n : a), t.nodes[0]);
+    const rx = top.x - l / 2, hh = geo.shape.hmax, rz = -L / 2 - 0.9;
+    add(v(rx, H, rz), v(rx, H + hh, rz)); add(v(rx - tk, H, rz), v(rx + tk, H, rz)); add(v(rx - tk, H + hh, rz), v(rx + tk, H + hh, rz));
+    root.add(label(`ferme ${f(hh)} m`, v(rx, H + hh / 2, rz), 'hi'));
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    root.add(new THREE.LineSegments(g, mats.dim));
+  }
+
+  /* ---------------- Personnages de maquette ---------------- */
+  function makeFigure(h, pose) {
+    const s = h / 1.75, g = new THREE.Group(), mat = mats.figure;
+    const cap = (r, len) => new THREE.CapsuleGeometry(r, len, 4, 10);
+    const limb = (geo, px, py, rx, rz, off) => {
+      const pivot = new THREE.Group(); pivot.position.set(px, py, 0);
+      const m = new THREE.Mesh(geo, mat); m.position.y = -off; m.castShadow = true;
+      pivot.add(m); pivot.rotation.x = rx; pivot.rotation.z = rz || 0; g.add(pivot);
+    };
+    const swing = pose === 'walk' ? 0.32 : 0;
+    const legG = cap(0.068 * s, 0.74 * s);
+    limb(legG, -0.088 * s, 0.9 * s, swing, 0, 0.44 * s);
+    limb(legG, 0.088 * s, 0.9 * s, -swing, 0, 0.44 * s);
+    const torso = new THREE.Mesh(cap(0.165 * s, 0.34 * s), mat);
+    torso.position.y = 1.17 * s; torso.scale.z = 0.68; torso.castShadow = true; g.add(torso);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.105 * s, 18, 14), mat);
+    head.position.y = 1.63 * s; head.castShadow = true; g.add(head);
+    const armG = cap(0.048 * s, 0.5 * s);
+    limb(armG, -0.225 * s, 1.43 * s, pose === 'walk' ? -swing : 0, -0.06, 0.3 * s);
+    limb(armG, 0.225 * s, 1.43 * s, pose === 'point' ? -2.45 : pose === 'walk' ? swing : 0, pose === 'point' ? -0.25 : 0.06, 0.3 * s);
+    return g;
+  }
+
+  /* ---------------- Vues ---------------- */
+  V.setView = function (name, keep) {
+    if (!V._center) return;
+    V._view = name;
+    const dirs = { persp: [-1.0, 0.62, -1.3], face: [0, 0.1, -1], side: [-1, 0.1, 0], top: [0, 1, -0.0001], detail: [0.8, -0.22, -0.55] };
+    const d = new THREE.Vector3(...(dirs[name] || dirs.persp)).normalize();
+    let dist = V._radius / Math.sin(camera.fov * Math.PI / 360) * (name === 'persp' ? 0.62 : name === 'top' ? 0.7 : 0.6) / Math.min(1, camera.aspect * 0.8);
+    let target = V._center;
+    if (name === 'detail' && V._detail) { target = V._detail.target; dist = V._detail.dist / Math.min(1, camera.aspect * 0.8); }
+    controls.target.copy(target);
+    camera.position.copy(target).addScaledVector(d, dist);
+    camera.near = Math.max(0.05, dist / 500); camera.far = dist * 10;
+    camera.updateProjectionMatrix();
+    controls.update();
+    needs = true;
+  };
+
+  /* ---------------- Survol : infobulle ---------------- */
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+  let moveReq = null;
+  function onMove(ev) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const x = ev.clientX - rect.left, y = ev.clientY - rect.top;
+    if (moveReq) return;
+    moveReq = requestAnimationFrame(() => {
+      moveReq = null;
+      ptr.set(x / rect.width * 2 - 1, -y / rect.height * 2 + 1);
+      ray.setFromCamera(ptr, camera);
+      ray.params.Line.threshold = Math.max(0.05, camera.position.distanceTo(controls.target) / 400);
+      let best = null;
+      for (const p of pickables) {
+        const hits = ray.intersectObject(p.obj, false);
+        if (!hits.length) continue;
+        const h = hits[0];
+        const m = p.kind === 'inst' ? p.list[h.instanceId] : p.list[Math.floor(h.index / 2)];
+        if (m && (!best || h.distance < best.d)) best = { d: h.distance, m };
+      }
+      if (!best) { tip.hidden = true; return; }
+      tip.innerHTML = PS.ui ? PS.ui.memberTip(best.m, lastR) : best.m.role;
+      tip.hidden = false;
+      const tw = tip.offsetWidth, th = tip.offsetHeight;
+      tip.style.left = Math.min(rect.width - tw - 8, x + 14) + 'px';
+      tip.style.top = Math.max(8, y - th - 10) + 'px';
+    });
+  }
+
+  /* ---------------- Export OBJ (mètres, un groupe par rôle) ---------------- */
+  V.exportOBJ = function (R) {
+    const M = R.model3d; if (!M) return '';
+    const out = ['# Atelier Treillis — export OBJ (unités : mètres, Y vertical)', `# ${R.P.span} m × ${R.P.length} m`];
+    let vOff = 1;
+    const byRole = new Map();
+    for (const m of M.members) { if (!byRole.has(m.role)) byRole.set(m.role, []); byRole.get(m.role).push(m); }
+    const v = new THREE.Vector3();
+    for (const [role, list] of byRole) {
+      out.push(`g ${(PS.ROLE_LABEL[role] || role).replace(/\s+/g, '_')}`);
+      for (const m of list) {
+        const geo = sectionGeometry(m.sec);
+        const pos = geo.attributes.position, idx = geo.index;
+        setBasis(tmp.m, m.a, m.b, m.up);
+        for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyMatrix4(tmp.m); out.push(`v ${v.x.toFixed(4)} ${v.y.toFixed(4)} ${v.z.toFixed(4)}`); }
+        if (idx) for (let i = 0; i < idx.count; i += 3) out.push(`f ${idx.getX(i) + vOff} ${idx.getX(i + 1) + vOff} ${idx.getX(i + 2) + vOff}`);
+        else for (let i = 0; i < pos.count; i += 3) out.push(`f ${i + vOff} ${i + 1 + vOff} ${i + 2 + vOff}`);
+        vOff += pos.count;
+      }
+    }
+    out.push('g Axes_des_barres');
+    for (const m of M.members) {
+      out.push(`v ${m.a.map((x) => x.toFixed(4)).join(' ')}`, `v ${m.b.map((x) => x.toFixed(4)).join(' ')}`, `l ${vOff} ${vOff + 1}`);
+      vOff += 2;
+    }
+    return out.join('\n');
+  };
+
+  V.snapshot = function () { renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); };
+  V.redraw = function () { if (lastR) V.update(lastR, lastD); };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* js/ui.js */
+/* Atelier Treillis — interface : paramètres, onglets d'analyse, carte des limites, exports. */
+(function (G) {
+  'use strict';
+  const PS = G.PS;
+  const $ = (s, el) => (el || document).querySelector(s);
+  const nf = (v, d = 2) => Number(v).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const STATUS = { ok: 'OK', warn: 'À surveiller', bad: 'Hors limite' };
+  const VERDICT = { ok: 'Constructible', warn: 'Constructible, avec réserves', bad: 'Hors limites' };
+
+  /* ---------------- État ---------------- */
+  const STORE = 'atelier-treillis-v1';
+  const DDEF = { mode: 'solid', color: 'material', cover: 'partial', details: true, socle: true, people: true, dims: true };
+  let P = Object.assign({}, PS.DEFAULTS), D = Object.assign({}, DDEF), tab = 'diag';
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE) || 'null');
+    if (s) { Object.assign(P, s.P || {}); Object.assign(D, s.D || {}); tab = s.tab || tab; }
+  } catch (e) { /* stockage indisponible */ }
+  const save = () => { try { localStorage.setItem(STORE, JSON.stringify({ P, D, tab })); } catch (e) { /* ignoré */ } };
+  let R = null;
+  const dirty = new Set();
+
+  /* ---------------- Pictogrammes ---------------- */
+  const ic = (d) => `<svg width="30" height="16" viewBox="0 0 30 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="${d}"/></svg>`;
+  const ICON = {
+    duo: ic('M1 14 L15 2 L29 14 Z M8 14 V8 M15 14 V2 M22 14 V8'),
+    mono: ic('M1 14 L29 2 V14 Z M10 14 V10 M19 14 V6'),
+    flat: ic('M1 4 H29 V13 H1 Z M8 4 V13 M15 4 V13 M22 4 V13'),
+    pratt: ic('M1 3 H29 M1 13 H29 M1 3 V13 M8 3 V13 M15 3 V13 M22 3 V13 M29 3 V13 M1 3 L8 13 M8 3 L15 13 M15 13 L22 3 M22 13 L29 3'),
+    howe: ic('M1 3 H29 M1 13 H29 M1 3 V13 M8 3 V13 M15 3 V13 M22 3 V13 M29 3 V13 M1 13 L8 3 M8 13 L15 3 M15 3 L22 13 M22 3 L29 13'),
+    warren: ic('M1 3 H29 M1 13 H29 M1 3 V13 M8 3 V13 M15 3 V13 M22 3 V13 M29 3 V13 M1 13 L8 3 L15 13 L22 3 L29 13'),
+  };
+
+  /* ---------------- Définition des commandes ---------------- */
+  const SECTIONS = [
+    { title: 'Typologie', items: [
+      { id: 'typo', type: 'seg', label: 'Forme de la ferme', opts: [['duo', 'Deux pans', ICON.duo], ['mono', 'Monopente', ICON.mono], ['flat', 'Poutre plate', ICON.flat]] },
+      { id: 'pattern', type: 'seg', label: 'Treillis', opts: [['pratt', 'Pratt', ICON.pratt], ['howe', 'Howe', ICON.howe], ['warren', 'Warren', ICON.warren]],
+        note: (p) => patternNote(p) },
+    ] },
+    { title: 'Dimensions', items: [
+      { id: 'span', type: 'range', label: 'Portée (largeur)', min: 6, max: 60, step: 0.5, unit: 'm' },
+      { id: 'length', type: 'range', label: 'Longueur du bâtiment', min: 6, max: 120, step: 0.5, unit: 'm' },
+      { id: 'colH', type: 'range', label: 'Hauteur des poteaux', min: 2.5, max: 15, step: 0.1, unit: 'm' },
+      { id: 'trussH', type: 'range', label: (p) => ({ duo: 'Hauteur de ferme au faîtage', mono: 'Hauteur côté haut', flat: 'Hauteur de la poutre' })[p.typo], min: 0.4, max: 12, step: 0.05, unit: 'm' },
+      { id: 'aboutH', type: 'range', label: (p) => p.typo === 'mono' ? 'Hauteur côté bas' : 'Hauteur à l’about (rive)', min: 0, max: 4, step: 0.05, unit: 'm', show: (p) => p.typo !== 'flat',
+        note: (p) => p.typo === 'duo' && p.aboutH < 0.01 ? 'À zéro : ferme triangulaire, comme dans le tutoriel Grasshopper.' : '' },
+      { id: 'flatSlope', type: 'range', label: 'Pente de forme', min: 0, max: 15, step: 0.5, unit: '%', show: (p) => p.typo === 'flat',
+        note: () => 'La membrure supérieure se casse en deux pans pour évacuer l’eau.' },
+    ] },
+    { title: 'Trame', items: [
+      { id: 'bayTarget', type: 'range', label: 'Entraxe visé des fermes', min: 2, max: 12, step: 0.25, unit: 'm' },
+      { id: 'panelsAuto', type: 'switch', label: 'Découpage automatique', note: (p) => p.panelsAuto ? 'Pannes posées aux nœuds, diagonales proches de 45°, le moins de barres possible.' : 'Nombre de panneaux imposé.' },
+      { id: 'panels', type: 'range', label: 'Nombre de panneaux', min: 2, max: 40, step: 1, unit: '', show: (p) => !p.panelsAuto },
+      { id: 'tieSpacing', type: 'range', label: 'Filants de membrure inférieure tous les', min: 1.5, max: 12, step: 0.5, unit: 'm',
+        note: () => 'Ils tiennent la membrure inférieure, comprimée quand le vent soulève la toiture.' },
+      { type: 'derived' },
+    ] },
+    { title: 'Matériau', items: [
+      { id: 'material', type: 'seg', label: 'Structure', opts: [['steel', 'Acier'], ['timber', 'Bois']] },
+      { id: 'steelGrade', type: 'select', label: 'Nuance d’acier', opts: [['S235', 'S235'], ['S275', 'S275'], ['S355', 'S355']], show: (p) => p.material === 'steel' },
+      { id: 'trussFamily', type: 'seg', label: 'Barres de ferme', opts: [['SHS', 'Tubes carrés'], ['CHS', 'Tubes ronds']], show: (p) => p.material === 'steel' },
+      { id: 'colFamily', type: 'seg', label: 'Poteaux', opts: [['HEA', 'HEA'], ['IPE', 'IPE']], show: (p) => p.material === 'steel' },
+      { id: 'timberGrade', type: 'select', label: 'Classe de résistance', opts: [['GL24h', 'GL24h — lamellé-collé'], ['GL28h', 'GL28h — lamellé-collé'], ['C24', 'C24 — bois massif']], show: (p) => p.material === 'timber',
+        note: () => 'Contreventements, butons et filants restent en acier.' },
+    ] },
+    { title: 'Couverture', items: [
+      { id: 'roofing', type: 'seg', label: 'Matériau de couverture', opts: [['zinc', 'Zinc'], ['glass', 'Verre']],
+        note: (p) => { const r = PS.ROOFING[p.roofing]; return `${r.desc}. ${nf(r.g, 2)} kN/m², pente mini ${nf(r.minSlope * 100, 0)} %, pannes tous les ${nf(r.purlinMax, 1)} m au plus, flèche ≤ l/${r.deflRatio}.`; } },
+    ] },
+    { title: 'Site — Eurocodes, France', items: [
+      { id: 'snowRegion', type: 'select', label: 'Région de neige', opts: Object.keys(PS.SNOW).map((k) => [k, `${k} — sk = ${nf(PS.SNOW[k], 2)} kN/m²`]) },
+      { id: 'altitude', type: 'range', label: 'Altitude', min: 0, max: 1000, step: 50, unit: 'm' },
+      { id: 'windRegion', type: 'select', label: 'Région de vent', opts: [1, 2, 3, 4].map((k) => [String(k), `Région ${k} — vb,0 = ${PS.WIND_VB[k]} m/s`]) },
+      { id: 'terrain', type: 'select', label: 'Rugosité du terrain', opts: Object.keys(PS.TERRAIN).map((k) => [k, PS.TERRAIN[k].label]) },
+    ] },
+  ];
+
+  function patternNote(p) {
+    const base = {
+      pratt: 'Diagonales orientées pour être tendues sous la charge de toiture : elles ne flambent pas, le choix naturel en acier.',
+      howe: 'Diagonales orientées pour être comprimées, montants tendus : le schéma historique du bois, montants remplacés par des tirants métalliques.',
+      warren: 'Diagonales alternées : leur effort change de signe d’un panneau à l’autre.',
+    }[p.pattern];
+    if (!R || !R.an) return base;
+    const N = R.an.Ncombo[0], sgn = { diag: [0, 0], vert: [0, 0] };
+    R.geo.truss.members.forEach((m, q) => { if (sgn[m.g] && Math.abs(N[q]) > 0.5) sgn[m.g][N[q] > 0 ? 0 : 1]++; });
+    const word = ([t, c], fem) => t && c ? 'tantôt tendu' + (fem ? 'es' : 's') + ', tantôt comprimé' + (fem ? 'es' : 's')
+      : t ? 'tendu' + (fem ? 'es' : 's') : c ? 'comprimé' + (fem ? 'es' : 's') : 'peu sollicité' + (fem ? 'es' : 's');
+    let s = `${base} Ici, sous la neige : diagonales ${word(sgn.diag, true)}, montants ${word(sgn.vert, false)}.`;
+    if (p.typo !== 'flat' && p.pattern !== 'warren') s += ' Dans une ferme triangulaire, ce comportement impose des diagonales inversées par rapport à une poutre à membrures parallèles : la membrure inclinée reprend déjà l’effort tranchant.';
+    return s;
+  }
+
+  /* ---------------- Construction du panneau ---------------- */
+  const ctlRefs = [];
+  function buildParams() {
+    const root = $('#params');
+    root.innerHTML = '';
+    for (const sec of SECTIONS) {
+      const s = document.createElement('section');
+      s.className = 'psec';
+      s.innerHTML = `<h3>${esc(sec.title)}</h3>`;
+      for (const it of sec.items) {
+        const c = document.createElement('div');
+        c.className = 'ctl';
+        const ref = { it, el: c };
+        if (it.type === 'derived') {
+          c.innerHTML = '<div class="derived" id="derived"></div>';
+        } else if (it.type === 'range') {
+          c.innerHTML = `<div class="ctl-head"><label for="in-${it.id}"></label><span class="valbox"><input id="num-${it.id}" type="text" inputmode="decimal" aria-label="valeur"><span class="u">${esc(it.unit)}</span></span></div>
+            <input type="range" id="in-${it.id}" min="${it.min}" max="${it.max}" step="${it.step}"><div class="note"></div>`;
+          const rg = $('input[type=range]', c), num = $('#num-' + it.id, c);
+          rg.addEventListener('input', () => { set(it.id, parseFloat(rg.value)); });
+          const commit = () => {
+            let v = parseFloat(String(num.value).replace(',', '.'));
+            if (!isFinite(v)) v = P[it.id];
+            v = Math.min(it.max, Math.max(it.min, v));
+            set(it.id, v);
+          };
+          num.addEventListener('change', commit);
+          num.addEventListener('keydown', (e) => { if (e.key === 'Enter') { commit(); num.blur(); } });
+          ref.rg = rg; ref.num = num;
+        } else if (it.type === 'seg') {
+          c.innerHTML = `<div class="ctl-head"><label></label></div><div class="seg" role="group"></div><div class="note"></div>`;
+          const g = $('.seg', c);
+          for (const [v, lab, icon] of it.opts) {
+            const b = document.createElement('button');
+            b.type = 'button'; b.dataset.v = v;
+            b.innerHTML = (icon || '') + `<span>${esc(lab)}</span>`;
+            b.id = `seg-${it.id}-${v}`;
+            b.addEventListener('click', () => set(it.id, v));
+            g.appendChild(b);
+          }
+          ref.seg = g;
+        } else if (it.type === 'select') {
+          c.innerHTML = `<div class="ctl-head"><label for="sel-${it.id}"></label></div><select class="sel" id="sel-${it.id}">${it.opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select><div class="note"></div>`;
+          const sel = $('select', c);
+          sel.addEventListener('change', () => set(it.id, it.id === 'windRegion' ? parseInt(sel.value, 10) : sel.value));
+          ref.sel = sel;
+        } else if (it.type === 'switch') {
+          c.innerHTML = `<label class="switch" for="sw-${it.id}"><span></span><input type="checkbox" id="sw-${it.id}"></label><div class="note"></div>`;
+          const cb = $('input', c);
+          cb.addEventListener('change', () => set(it.id, cb.checked));
+          ref.cb = cb;
+        }
+        s.appendChild(c);
+        ctlRefs.push(ref);
+      }
+      root.appendChild(s);
+    }
+    const foot = document.createElement('div');
+    foot.className = 'psec';
+    foot.innerHTML = '<button class="btn" type="button" id="reset">Revenir aux valeurs de départ</button>';
+    root.appendChild(foot);
+    $('#reset').addEventListener('click', () => { P = Object.assign({}, PS.DEFAULTS); syncControls(); schedule(); toast('Paramètres réinitialisés'); });
+  }
+
+  function syncControls() {
+    for (const r of ctlRefs) {
+      const it = r.it;
+      if (it.type === 'derived') continue;
+      const visible = !it.show || it.show(P);
+      r.el.hidden = !visible;
+      const lab = typeof it.label === 'function' ? it.label(P) : it.label;
+      const labEl = $('label', r.el);
+      if (labEl) { if (it.type === 'switch') $('span', labEl).textContent = lab; else labEl.textContent = lab; }
+      const note = $('.note', r.el);
+      if (note) { const t = it.note ? it.note(P) : ''; note.textContent = t || ''; note.hidden = !t; }
+      if (it.type === 'range') {
+        let max = it.max;
+        if (it.id === 'aboutH') max = Math.max(0.05, Math.min(4, P.trussH - 0.1));
+        r.rg.max = max;
+        r.rg.value = P[it.id];
+        if (document.activeElement !== r.num) r.num.value = nf(P[it.id], it.step < 0.1 ? 2 : it.step < 1 ? 1 : 0);
+      } else if (it.type === 'seg') {
+        for (const b of r.seg.children) b.setAttribute('aria-pressed', String(b.dataset.v === String(P[it.id])));
+      } else if (it.type === 'select') {
+        r.sel.value = String(P[it.id]);
+      } else if (it.type === 'switch') {
+        r.cb.checked = !!P[it.id];
+      }
+    }
+  }
+
+  function set(id, v) {
+    if (P[id] === v) return;
+    const prev = P[id];
+    P[id] = v;
+    // Préréglages cohérents lors d'un changement de typologie ou de couverture
+    if (id === 'typo') {
+      const l = P.span;
+      if (v === 'duo') { P.trussH = +(l / 5).toFixed(2); P.aboutH = 0; }
+      if (v === 'mono') { P.trussH = +(l / 6.5).toFixed(2); P.aboutH = 0.4; }
+      if (v === 'flat') { P.trussH = +(Math.max(0.6, l / 12)).toFixed(2); P.flatSlope = PS.ROOFING[P.roofing].minSlope * 100; }
+    }
+    if (id === 'roofing' && P.typo === 'flat' && P.flatSlope < PS.ROOFING[v].minSlope * 100) P.flatSlope = PS.ROOFING[v].minSlope * 100;
+    if (id === 'trussH' && P.aboutH > v - 0.1) P.aboutH = Math.max(0, +(v - 0.1).toFixed(2));
+    if (id === 'panelsAuto' && v === false && R) P.panels = R.geo.n;
+    void prev;
+    syncControls();
+    schedule();
+  }
+
+  /* ---------------- Calcul et rendu ---------------- */
+  let pending = false;
+  function schedule() {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => { pending = false; run(); });
+  }
+
+  function run() {
+    try { R = PS.compute(P); } catch (err) { console.error(err); toast('Erreur de calcul : ' + err.message); return; }
+    save();
+    syncControls();
+    renderVerdict();
+    renderHUD();
+    renderDerived();
+    if (PS.view3d && viewOK) { try { PS.view3d.update(R, D); } catch (err) { console.error(err); } }
+    renderLegend();
+    ['diag', 'truss', 'map', 'compare', 'bom', 'hyp'].forEach((t) => dirty.add(t));
+    renderPane();
+  }
+
+  function renderVerdict() {
+    const v = R.diag.verdict, items = R.diag.items.filter((d) => d.status !== 'ok');
+    const b = $('#verdict');
+    b.dataset.s = v;
+    $('#verdict-txt').textContent = VERDICT[v];
+    $('#verdict-sub').textContent = items.length ? `${items.length} point${items.length > 1 ? 's' : ''} ${v === 'bad' ? 'bloquant' + (items.filter((d) => d.status === 'bad').length > 1 ? 's' : '') : 'à surveiller'}` : 'tous les critères passent';
+  }
+
+  function renderHUD() {
+    const q = R.bom, timber = R.material.kind === 'timber';
+    const kf = (lab, val, unit) => `<div class="kf"><span>${lab}</span><b>${val}${unit ? `<small>${unit}</small>` : ''}</b></div>`;
+    if (!q) { $('#hud').innerHTML = kf('Structure', R.error ? 'instable' : '—', ''); return; }
+    $('#hud').innerHTML =
+      kf('Masse', nf(q.total / 1000, 2), 't') +
+      kf('Ratio', nf(q.perM2, 1), 'kg/m²') +
+      kf('Pièces', nf(q.pieces, 0), '') +
+      (timber ? kf('Bois', nf(q.timberVol, 1), 'm³') : kf('Fermes', `${R.geo.nFrames}`, `× ${nf(R.P.span, 1)} m`));
+  }
+
+  function renderDerived() {
+    const el = $('#derived'); if (!el) return;
+    const g = R.geo;
+    el.innerHTML = [
+      ['Panneaux', `${g.n} × ${nf(g.truss.dx, 2)} m`],
+      ['Fermes', `${g.nFrames} (${g.nBays} travées)`],
+      ['Entraxe réel', `${nf(g.e, 2)} m`],
+      ['Pente', `${nf(g.shape.slope * 100, 1)} % · ${nf(g.shape.alpha * 180 / Math.PI, 1)}°`],
+      ['Files de pannes', `${g.purlins.length}`],
+    ].map(([k, v]) => `<span>${k}</span><b>${v}</b>`).join('');
+  }
+
+  /* ---------------- Vue 3D : commandes ---------------- */
+  let viewOK = false;
+  function buildViewControls() {
+    const views = [['persp', 'Perspective'], ['face', 'Pignon'], ['side', 'Long-pan'], ['top', 'Dessus'], ['detail', 'Détail d’un nœud']];
+    $('#views').innerHTML = `<div class="chipbar" role="group" aria-label="Points de vue">${views.map(([v, l]) => `<button type="button" data-view="${v}">${l}</button>`).join('')}</div>`;
+    $('#views').addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-view]'); if (!b || !PS.view3d) return;
+      PS.view3d.setView(b.dataset.view);
+    });
+    const rows = [
+      ['Rendu', 'mode', [['solid', 'Profilés'], ['wire', 'Filaire']]],
+      ['Couleurs', 'color', [['material', 'Matière'], ['role', 'Rôle'], ['force', 'Efforts'], ['util', 'Taux']]],
+      ['Couverture', 'cover', [['none', 'Sans'], ['partial', 'Partielle'], ['full', 'Complète']]],
+    ];
+    const toggles = [['details', 'Assemblages'], ['socle', 'Socle'], ['people', 'Personnages'], ['dims', 'Cotes']];
+    $('#display').innerHTML = '<button type="button" class="btn disp-toggle" id="disp-toggle" aria-expanded="false">Affichage</button>' + rows.map(([lab, key, opts]) => `<div class="chipbar" role="group" aria-label="${lab}"><span class="lbl">${lab}</span>${opts.map(([v, l]) => `<button type="button" data-k="${key}" data-v="${v}">${l}</button>`).join('')}</div>`).join('') +
+      `<div class="chipbar" role="group" aria-label="Éléments affichés">${toggles.map(([k, l]) => `<button type="button" data-t="${k}">${l}</button>`).join('')}</div>`;
+    $('#display').addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.id === 'disp-toggle') {
+        const open = $('#display').classList.toggle('open');
+        b.setAttribute('aria-expanded', String(open));
+        return;
+      }
+      if (b.dataset.k) D[b.dataset.k] = b.dataset.v;
+      if (b.dataset.t) D[b.dataset.t] = !D[b.dataset.t];
+      syncDisplay(); save();
+      if (R && PS.view3d && viewOK) PS.view3d.update(R, D);
+      renderLegend();
+    });
+    syncDisplay();
+  }
+  function syncDisplay() {
+    document.querySelectorAll('#display button').forEach((b) => {
+      if (b.dataset.k) b.setAttribute('aria-pressed', String(D[b.dataset.k] === b.dataset.v));
+      if (b.dataset.t) b.setAttribute('aria-pressed', String(!!D[b.dataset.t]));
+    });
+  }
+  const ROLE_SW = [['top', 'Membrure sup.', '#2B7A73'], ['bot', 'Membrure inf.', '#2F64B0'], ['vert', 'Montants', '#7A5BB0'], ['diag', 'Diagonales', '#D08A2E'], ['col', 'Poteaux', '#56656B'], ['purlin', 'Pannes', '#A07A38'], ['rod', 'Contreventements', '#C0402E'], ['strut', 'Butons, filants', '#6E8B3D']];
+  function renderLegend() {
+    const el = $('#legend');
+    if (D.color === 'role') el.innerHTML = `<div class="legend">${ROLE_SW.map(([, l, c]) => `<div class="row"><i style="background:${c}"></i>${l}</div>`).join('')}</div>`;
+    else if (D.color === 'force') el.innerHTML = `<div class="legend"><div class="row"><i style="background:#2F64B0"></i>Traction</div><div class="row"><i style="background:#C0402E"></i>Compression</div><div class="small">Intensité : effort maximal toutes combinaisons confondues</div></div>`;
+    else if (D.color === 'util') el.innerHTML = `<div class="legend"><span>Taux de travail</span><div class="grad"></div><div class="scale"><span>0</span><span>60 %</span><span>100 %</span></div></div>`;
+    else el.innerHTML = '';
+  }
+
+  /* ---------------- Infobulles ---------------- */
+  PS.ui = {
+    memberTip(m, RR) {
+      const lab = PS.ROLE_LABEL[m.role] || m.role;
+      const lines = [`<strong>${esc(lab)}</strong> · ${esc(m.sec.label)}`];
+      if (m.L) lines.push(`<span class="k">Longueur</span> ${nf(m.L, 2)} m`);
+      if (m.N) {
+        const parts = [];
+        if (m.N.Nt > 0.05) parts.push(`<span class="t">traction ${nf(m.N.Nt, 1)} kN</span>`);
+        if (m.N.Nc > 0.05) parts.push(`<span class="c">compression ${nf(m.N.Nc, 1)} kN</span>`);
+        if (parts.length) lines.push(parts.join(' · '));
+      }
+      if (m.u != null) lines.push(`<span class="k">Taux de travail</span> ${nf(m.u * 100, 0)} %${m.crit ? ` — ${esc(m.crit)}` : ''}`);
+      return lines.join('<br>');
+    },
+  };
+
+  /* ---------------- Onglets ---------------- */
+  const TABS = [['diag', 'Diagnostic'], ['truss', 'Ferme type'], ['map', 'Limites'], ['compare', 'Acier / bois'], ['bom', 'Nomenclature'], ['hyp', 'Hypothèses']];
+  function buildTabs() {
+    $('#tabs').innerHTML = TABS.map(([k, l]) => `<button type="button" role="tab" id="tab-${k}" aria-controls="pane" data-tab="${k}">${l}</button>`).join('');
+    $('#panes').innerHTML = '<div class="pane" id="pane" role="tabpanel"></div>';
+    $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('button[data-tab]'); if (b) selectTab(b.dataset.tab); });
+    $('#verdict').addEventListener('click', () => { selectTab('diag'); $('.dock').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  }
+  function selectTab(t) {
+    tab = t; save();
+    dirty.add(t);
+    renderPane();
+  }
+  function renderPane() {
+    document.querySelectorAll('#tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+    if (!R || !dirty.has(tab)) return;
+    dirty.delete(tab);
+    const el = $('#pane');
+    const fn = { diag: paneDiag, truss: paneTruss, map: paneMap, compare: paneCompare, bom: paneBom, hyp: paneHyp }[tab];
+    fn(el);
+  }
+
+  const uColor = (u) => u > 1 ? 'var(--bad)' : u > 0.85 ? 'var(--warn)' : 'var(--ok)';
+  const ubar = (u) => `<div class="bar-u"><i style="width:${Math.min(100, u * 100).toFixed(0)}%;background:${uColor(u)}"></i></div>`;
+
+  /* ----- Diagnostic ----- */
+  function paneDiag(el) {
+    const d = R.diag;
+    const lead = {
+      ok: 'Toutes les vérifications passent : la ferme est cohérente avec ses proportions, ses charges et sa couverture.',
+      warn: 'La structure tient, mais certains choix s’écartent des usages. Les points signalés expliquent pourquoi et comment corriger.',
+      bad: 'Au moins un critère n’est pas respecté : en l’état, la proposition n’est pas constructible. Les points rouges indiquent quoi modifier.',
+    }[d.verdict];
+    const checks = d.items.map((it) => `<div class="check"><span class="pill ${it.status}">${STATUS[it.status]}</span><div><div class="ttl">${esc(it.title)}</div><div class="val">${esc(it.value)}</div><div class="exp">${esc(it.explain)}</div></div></div>`).join('');
+    let secRows = '';
+    if (R.sizing && !R.error) {
+      const row = (lab, sec, u, crit, ok) => `<tr><td>${lab}</td><td class="mono">${esc(sec.label)}${ok === false ? ' <span class="pill bad">insuffisant</span>' : ''}</td><td class="n">${nf(u * 100, 0)} %${ubar(u)}</td><td class="small">${esc(crit || '')}</td></tr>`;
+      for (const g of ['top', 'bot', 'vert', 'diag']) if (R.sizing[g]) secRows += row(PS.GROUP_LABEL[g], R.secs[g], R.sizing[g].worst.u, R.sizing[g].worst.crit, R.sizing[g].ok);
+      secRows += row('Poteaux', R.secs.col, R.sizing.col.u, R.sizing.col.crit, R.sizing.col.ok);
+      secRows += row('Pannes', R.purl.sec, R.purl.umax, R.purl.crit, R.purl.ok);
+      if (R.stab) {
+        secRows += row('Croix de toiture', R.stab.rodRoof.sec, R.stab.rodRoof.u, 'traction', R.stab.rodRoof.ok);
+        secRows += row('Palées de stabilité', R.stab.rodWall.sec, R.stab.rodWall.u, 'traction', R.stab.rodWall.ok);
+        secRows += row('Butons', R.stab.strut.sec, R.stab.strut.u, R.stab.strut.crit, R.stab.strut.ok);
+        secRows += row('Filants', R.stab.tie.sec, R.stab.tie.u, R.stab.tie.crit, R.stab.tie.ok);
+      }
+    }
+    el.innerHTML = `<div class="cols"><div><h4>Diagnostic de constructibilité</h4><p class="lead">${lead}</p><div class="checks">${checks}</div></div>
+      <div><h4>Profils retenus automatiquement</h4><p class="lead">Pour chaque famille de barres, le profil le plus léger du catalogue qui passe toutes les combinaisons de charges.</p>
+      <div class="scroll-x"><table class="t"><thead><tr><th>Élément</th><th>Profil</th><th class="n">Taux</th><th>Critère déterminant</th></tr></thead><tbody>${secRows}</tbody></table></div></div></div>`;
+  }
+
+  /* ----- Ferme type (élévation SVG) ----- */
+  let trussSel = 'env', showN = true, showLoads = true;
+  function paneTruss(el) {
+    if (R.error) { el.innerHTML = `<p class="lead">${esc(R.error)}</p>`; return; }
+    const opts = [['env', 'Enveloppe : effort maximal de chaque barre']].concat(R.combos.map((c, i) => [String(i), `${c.id} — ${c.label}`]));
+    el.innerHTML = `<div class="toolbar"><label for="combo">Cas affiché</label><select class="sel" id="combo" style="width:auto">${opts.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}</select>
+      <label><input type="checkbox" id="chkN"> Valeurs (kN)</label><label><input type="checkbox" id="chkL"> Charges</label></div>
+      <div class="svgwrap" id="trusswrap"></div>
+      <p class="small" style="margin-top:8px">Épaisseur des traits = hauteur réelle des profils. <span style="color:var(--tension)">Bleu : traction</span>, <span style="color:var(--compression)">rouge : compression</span>, intensité proportionnelle à l’effort. Survolez une barre pour son détail.</p>`;
+    const sel = $('#combo', el); sel.value = trussSel;
+    $('#chkN', el).checked = showN; $('#chkL', el).checked = showLoads;
+    sel.addEventListener('change', () => { trussSel = sel.value; drawTruss(); });
+    $('#chkN', el).addEventListener('change', (e) => { showN = e.target.checked; drawTruss(); });
+    $('#chkL', el).addEventListener('change', (e) => { showLoads = e.target.checked; drawTruss(); });
+    drawTruss();
+  }
+  function drawTruss() {
+    const wrap = $('#trusswrap'); if (!wrap) return;
+    const { P: p, geo } = R, t = geo.truss, l = p.span, H = p.colH, hm = geo.shape.hmax;
+    const pad = Math.max(1.4, l * 0.07);
+    const x0 = -pad * 1.1, x1 = l + pad * 0.7, yTop = hm + pad * 1.1, yBot = -H - pad * 0.35;
+    const W = x1 - x0, HH = yTop - yBot;
+    const fs = Math.max(W / 62, HH / 30);
+    const N = R.members.map((m, q) => {
+      if (trussSel === 'env') return m.env.Nt >= m.env.Nc ? m.env.Nt : -m.env.Nc;
+      return R.an.Ncombo[+trussSel][q];
+    });
+    const nmax = Math.max(1e-6, ...N.map(Math.abs));
+    const nd = t.nodes;
+    let s = `<svg viewBox="${x0} ${-yTop} ${W} ${HH}" role="img" aria-label="Élévation de la ferme type avec ses efforts">`;
+    // sol
+    s += `<line x1="${x0}" y1="${H}" x2="${x1}" y2="${H}" style="stroke:var(--ink-3);stroke-width:${fs * 0.08}"/>`;
+    for (let x = x0; x < x1; x += fs * 0.9) s += `<line x1="${x}" y1="${H + fs * 0.6}" x2="${x + fs * 0.6}" y2="${H}" style="stroke:var(--line);stroke-width:${fs * 0.05}"/>`;
+    // poteaux
+    const ch = R.secs.col.h / 1000;
+    for (const x of [0, l]) s += `<rect x="${x - ch / 2}" y="0" width="${ch}" height="${H}" style="fill:var(--inset);stroke:var(--ink-3);stroke-width:${fs * 0.05}"/>`;
+    // pannes (en section)
+    const ph = R.purl.sec.h / 1000, pb = R.purl.sec.b / 1000, off = R.secs.top.h / 2000 + ph / 2;
+    for (const pu of geo.purlins) {
+      const ang = Math.atan2(pu.nx, pu.ny) * 180 / Math.PI;
+      s += `<rect x="${-pb / 2}" y="${-ph / 2}" width="${pb}" height="${ph}" transform="translate(${pu.x + pu.nx * off} ${-(pu.y + pu.ny * off)}) rotate(${ang})" style="fill:var(--ink-3)"/>`;
+    }
+    // barres
+    R.members.forEach((m, q) => {
+      const a = nd[m.a], b = nd[m.b], v = N[q], k = Math.abs(v) / nmax;
+      const col = Math.abs(v) < nmax * 0.005 ? 'var(--ink-3)' : v > 0 ? 'var(--tension)' : 'var(--compression)';
+      const w = Math.max(fs * 0.12, m.sec.h / 1000);
+      s += `<line data-q="${q}" x1="${a.x}" y1="${-a.y}" x2="${b.x}" y2="${-b.y}" style="stroke:${col};stroke-opacity:${(0.35 + 0.65 * Math.sqrt(k)).toFixed(2)};stroke-width:${w}" />`;
+    });
+    // nœuds
+    for (const n of nd) s += `<circle cx="${n.x}" cy="${-n.y}" r="${fs * 0.13}" style="fill:var(--raised);stroke:var(--ink-2);stroke-width:${fs * 0.05}"/>`;
+    // valeurs
+    if (showN) {
+      R.members.forEach((m, q) => {
+        const a = nd[m.a], b = nd[m.b], v = N[q];
+        if (Math.abs(v) < 0.5) return;
+        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        const dx = (b.x - a.x) / m.L, dy = (b.y - a.y) / m.L;
+        const o = m.g === 'bot' ? -fs * 0.75 : m.g === 'top' ? fs * 0.75 : 0;
+        s += `<text x="${mx - dy * o}" y="${-(my + dx * o) + fs * 0.25}" font-size="${fs * 0.62}" text-anchor="middle" style="fill:${v > 0 ? 'var(--tension)' : 'var(--compression)'};font-family:var(--font-mono);paint-order:stroke;stroke:var(--raised);stroke-width:${fs * 0.22}">${v > 0 ? '+' : '−'}${Math.abs(v).toFixed(0)}</text>`;
+      });
+    }
+    // charges du cas affiché
+    if (showLoads && trussSel !== 'env') {
+      const c = R.combos[+trussSel], F = new Float64Array(3 * R.an.fe.nodes.length);
+      for (const k in c.f) { const v = R.an.cases[k]; if (v) for (let i = 0; i < F.length; i++) F[i] += c.f[k] * v[i]; }
+      let fmax = 0;
+      const fe = R.an.fe;
+      for (let i = 0; i < fe.nodes.length; i++) fmax = Math.max(fmax, Math.hypot(F[3 * i], F[3 * i + 1]));
+      const Lm = pad * 0.75;
+      for (let i = 0; i < fe.nodes.length; i++) {
+        const fx = F[3 * i], fy = F[3 * i + 1], f = Math.hypot(fx, fy);
+        if (f < fmax * 0.03) continue;
+        const n = fe.nodes[i], len = Lm * (0.25 + 0.75 * f / fmax), ux = fx / f, uy = fy / f;
+        const sx = n.x - ux * len, sy = n.y - uy * len;
+        const hx = n.x - ux * fs * 0.1, hy = n.y - uy * fs * 0.1;
+        const ah = fs * 0.35;
+        s += `<line x1="${sx}" y1="${-sy}" x2="${hx}" y2="${-hy}" style="stroke:var(--accent);stroke-width:${fs * 0.07}"/>`;
+        s += `<path d="M${hx} ${-hy} L${hx - ux * ah - uy * ah * 0.5} ${-(hy - uy * ah + ux * ah * 0.5)} L${hx - ux * ah + uy * ah * 0.5} ${-(hy - uy * ah - ux * ah * 0.5)} Z" style="fill:var(--accent)"/>`;
+      }
+    }
+    // cotes
+    const dimH = (xa, xb, y, txt) => `<line x1="${xa}" y1="${-y}" x2="${xb}" y2="${-y}" style="stroke:var(--ink-3);stroke-width:${fs * 0.05}"/><line x1="${xa}" y1="${-y - fs * 0.3}" x2="${xa}" y2="${-y + fs * 0.3}" style="stroke:var(--ink-3);stroke-width:${fs * 0.05}"/><line x1="${xb}" y1="${-y - fs * 0.3}" x2="${xb}" y2="${-y + fs * 0.3}" style="stroke:var(--ink-3);stroke-width:${fs * 0.05}"/><text x="${(xa + xb) / 2}" y="${-y - fs * 0.35}" font-size="${fs * 0.7}" text-anchor="middle" class="ink2" style="font-family:var(--font-mono)">${txt}</text>`;
+    const dimV = (x, ya, yb, txt) => `<line x1="${x}" y1="${-ya}" x2="${x}" y2="${-yb}" style="stroke:var(--ink-3);stroke-width:${fs * 0.05}"/><line x1="${x - fs * 0.3}" y1="${-ya}" x2="${x + fs * 0.3}" y2="${-ya}" style="stroke:var(--ink-3);stroke-width:${fs * 0.05}"/><line x1="${x - fs * 0.3}" y1="${-yb}" x2="${x + fs * 0.3}" y2="${-yb}" style="stroke:var(--ink-3);stroke-width:${fs * 0.05}"/><text transform="translate(${x - fs * 0.45} ${-(ya + yb) / 2}) rotate(-90)" font-size="${fs * 0.7}" text-anchor="middle" class="ink2" style="font-family:var(--font-mono)">${txt}</text>`;
+    s += dimH(0, l, hm + pad * 0.55, `${nf(l, 2)} m — ${geo.n} panneaux de ${nf(t.dx, 2)} m`);
+    s += dimV(-pad * 0.55, 0, hm, `${nf(hm, 2)} m`);
+    s += dimV(-pad * 0.55, -H, 0, `${nf(H, 2)} m`);
+    s += '</svg>';
+    wrap.innerHTML = s;
+    wrap.onmousemove = (e) => {
+      const q = e.target.getAttribute && e.target.getAttribute('data-q');
+      if (q == null) { hideFloat(); return; }
+      const m = R.members[+q];
+      const html = PS.ui.memberTip({ role: m.g, sec: m.sec, L: m.L, N: m.env, u: m.u, crit: m.crit }, R) +
+        (trussSel !== 'env' ? `<br><span class="k">Dans ce cas</span> ${N[+q] >= 0 ? '+' : '−'}${nf(Math.abs(N[+q]), 1)} kN` : '') +
+        `<br><span class="k">Longueurs de flambement</span> ${nf(m.Lin, 2)} m (plan) · ${nf(m.Lout, 2)} m (hors plan)`;
+      showFloat(html, e.clientX, e.clientY);
+    };
+    wrap.onmouseleave = hideFloat;
+  }
+
+  /* ----- Infobulle flottante (onglets) ----- */
+  let floatTip = null;
+  function showFloat(html, x, y) {
+    if (!floatTip) { floatTip = document.createElement('div'); floatTip.className = 'tip'; floatTip.style.position = 'fixed'; document.body.appendChild(floatTip); }
+    floatTip.innerHTML = html; floatTip.hidden = false;
+    const w = floatTip.offsetWidth, h = floatTip.offsetHeight;
+    floatTip.style.left = Math.min(innerWidth - w - 8, x + 14) + 'px';
+    floatTip.style.top = Math.max(8, y - h - 12) + 'px';
+  }
+  function hideFloat() { if (floatTip) floatTip.hidden = true; }
+
+  /* ----- Carte des limites ----- */
+  let mapMode = 'verdict', mapKey = '', mapGen = 0, mapData = null;
+  function mapGrid() {
+    const flat = P.typo === 'flat';
+    const xs = []; for (let x = 6; x <= 60 + 1e-9; x += 2) xs.push(x);
+    const ys = []; const y0 = flat ? 0.4 : 0.5, y1 = flat ? 4.0 : 8.0, st = flat ? 0.15 : 0.3;
+    for (let y = y0; y <= y1 + 1e-9; y += st) ys.push(+y.toFixed(2));
+    return { xs, ys };
+  }
+  function paneMap(el) {
+    el.innerHTML = `<p class="lead">Chaque case est un calcul complet — géométrie, efforts, choix des profils, vérifications — pour une portée et une hauteur de ferme, tous les autres paramètres restant ceux du panneau de gauche. Le point marque votre projet ; cliquez une case pour l’essayer.</p>
+      <div class="toolbar"><div class="seg" style="width:auto" role="group" aria-label="Affichage de la carte"><button type="button" data-m="verdict">Verdict</button><button type="button" data-m="mass">Masse (kg/m²)</button></div><span class="small" id="mapstat"></span></div>
+      <div class="progress"><i id="mapprog"></i></div>
+      <div class="svgwrap mapwrap" id="mapwrap"></div>
+      <div class="toolbar" style="margin-top:10px" id="maplegend"></div>`;
+    el.querySelectorAll('[data-m]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.m === mapMode));
+      b.addEventListener('click', () => { mapMode = b.dataset.m; el.querySelectorAll('[data-m]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.m === mapMode))); paintMap(); });
+    });
+    const key = JSON.stringify(Object.assign({}, P, { span: 0, trussH: 0, panels: P.panelsAuto ? 0 : P.panels }));
+    if (key !== mapKey || !mapData) computeMap(key); else { drawMapFrame(); paintMap(); }
+  }
+  function computeMap(key) {
+    mapKey = key;
+    const gen = ++mapGen;
+    const { xs, ys } = mapGrid();
+    mapData = { xs, ys, cells: new Array(xs.length * ys.length).fill(null), done: 0 };
+    drawMapFrame();
+    const order = [];
+    // ordre entrelacé : une case sur deux d'abord, pour voir vite la forme du domaine
+    for (let pass = 0; pass < 2; pass++) for (let j = 0; j < ys.length; j++) for (let i = 0; i < xs.length; i++) if (((i + j) & 1) === pass) order.push([i, j]);
+    let k = 0;
+    const step = () => {
+      if (gen !== mapGen) return;
+      const t0 = performance.now();
+      while (k < order.length && performance.now() - t0 < 14) {
+        const [i, j] = order[k++];
+        const Pc = Object.assign({}, P, { span: xs[i], trussH: ys[j] });
+        let cell;
+        if (P.typo !== 'flat' && ys[j] <= P.aboutH + 0.1) cell = { na: true };
+        else {
+          try {
+            const r = PS.compute(Pc, { light: true });
+            cell = { v: r.diag.verdict, m: r.qty ? r.qty.perM2 : null, why: r.diag.items.filter((d) => d.status !== 'ok').map((d) => ({ s: d.status, t: d.title })) };
+          } catch (err) { cell = { na: true }; }
+        }
+        mapData.cells[j * xs.length + i] = cell;
+        mapData.done++;
+        paintCell(i, j);
+      }
+      const pr = $('#mapprog'); if (pr) pr.style.width = (100 * mapData.done / order.length).toFixed(1) + '%';
+      const stt = $('#mapstat'); if (stt) stt.textContent = k < order.length ? `calcul… ${Math.round(100 * k / order.length)} %` : `${order.length} configurations calculées`;
+      if (k < order.length) setTimeout(step, 0);
+      else renderMapLegend();
+    };
+    setTimeout(step, 0);
+  }
+  let mapGeom = null;
+  function drawMapFrame() {
+    const wrap = $('#mapwrap'); if (!wrap || !mapData) return;
+    const { xs, ys } = mapData;
+    const cw = 22, chh = 14, ml = 46, mb = 34, mt = 10, mr = 12;
+    const W = ml + xs.length * cw + mr, H = mt + ys.length * chh + mb;
+    mapGeom = { cw, chh, ml, mb, mt, W, H };
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Carte de constructibilité portée × hauteur">`;
+    for (let j = 0; j < ys.length; j++) for (let i = 0; i < xs.length; i++) {
+      s += `<rect id="mc-${i}-${j}" data-i="${i}" data-j="${j}" x="${ml + i * cw + 0.5}" y="${mt + (ys.length - 1 - j) * chh + 0.5}" width="${cw - 1}" height="${chh - 1}" rx="1.5" style="fill:var(--inset)"/>`;
+    }
+    for (let i = 0; i < xs.length; i++) if (xs[i] % 6 === 0) s += `<text x="${ml + i * cw + cw / 2}" y="${mt + ys.length * chh + 14}" font-size="10" text-anchor="middle" class="ink3" style="font-family:var(--font-mono)">${xs[i]}</text>`;
+    const yt = P.typo === 'flat' ? 0.5 : 1;
+    for (let j = 0; j < ys.length; j++) if (Math.abs(ys[j] / yt - Math.round(ys[j] / yt)) < 1e-6) s += `<text x="${ml - 6}" y="${mt + (ys.length - 1 - j) * chh + chh / 2 + 3.5}" font-size="10" text-anchor="end" class="ink3" style="font-family:var(--font-mono)">${nf(ys[j], ys[j] % 1 ? 1 : 0)}</text>`;
+    s += `<text x="${ml + xs.length * cw / 2}" y="${H - 4}" font-size="11" text-anchor="middle" class="ink2">Portée (m)</text>`;
+    s += `<text transform="translate(12 ${mt + ys.length * chh / 2}) rotate(-90)" font-size="11" text-anchor="middle" class="ink2">${P.typo === 'flat' ? 'Hauteur de poutre (m)' : 'Hauteur de ferme (m)'}</text>`;
+    s += `<g id="mapmark"></g></svg>`;
+    wrap.innerHTML = s;
+    wrap.onmousemove = (e) => {
+      const r = e.target.closest && e.target.closest('rect[data-i]');
+      if (!r) { hideFloat(); return; }
+      const i = +r.dataset.i, j = +r.dataset.j, c = mapData.cells[j * xs.length + i];
+      let html = `<strong>Portée ${nf(xs[i], 0)} m · hauteur ${nf(ys[j], 2)} m</strong><br>`;
+      if (!c) html += 'calcul en cours…';
+      else if (c.na) html += 'hauteur inférieure à la hauteur d’about';
+      else {
+        html += `${VERDICT[c.v]}${c.m ? ` · ${nf(c.m, 1)} kg/m²` : ''}`;
+        if (c.why.length) html += '<br>' + c.why.map((w) => `<span style="color:var(--${w.s})">●</span> ${esc(w.t)}`).join('<br>');
+      }
+      showFloat(html, e.clientX, e.clientY);
+    };
+    wrap.onmouseleave = hideFloat;
+    wrap.onclick = (e) => {
+      const r = e.target.closest && e.target.closest('rect[data-i]'); if (!r) return;
+      const i = +r.dataset.i, j = +r.dataset.j, c = mapData.cells[j * xs.length + i];
+      if (!c || c.na) return;
+      P.span = xs[i]; P.trussH = ys[j];
+      if (P.aboutH > P.trussH - 0.1) P.aboutH = Math.max(0, P.trussH - 0.1);
+      syncControls(); schedule();
+    };
+    for (let j = 0; j < ys.length; j++) for (let i = 0; i < xs.length; i++) paintCell(i, j);
+    drawMark();
+  }
+  const hex = (h) => { h = h.trim().replace('#', ''); if (h.length === 3) h = h.split('').map((c) => c + c).join(''); return [0, 2, 4].map((k) => parseInt(h.substr(k, 2), 16)); };
+  const cssv = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  function ramp(t) {
+    const dark = cssv('--bg').toLowerCase() < '#5';
+    const a = hex(dark ? '#1C3431' : '#E4F1EC'), b = hex(dark ? '#8FDCCF' : '#1E5C56');
+    t = Math.max(0, Math.min(1, t));
+    return `rgb(${a.map((v, k) => Math.round(v + (b[k] - v) * t)).join(',')})`;
+  }
+  function paintCell(i, j) {
+    const r = document.getElementById(`mc-${i}-${j}`); if (!r || !mapData) return;
+    const c = mapData.cells[j * mapData.xs.length + i];
+    let fill = 'var(--inset)';
+    if (c) {
+      if (c.na) fill = 'var(--cell-na)';
+      else if (mapMode === 'verdict') fill = `var(--cell-${c.v})`;
+      else fill = c.v === 'bad' ? 'var(--cell-na)' : ramp(((c.m || 0) - 10) / 50);
+    }
+    r.style.fill = fill;
+  }
+  function paintMap() { if (!mapData) return; for (let j = 0; j < mapData.ys.length; j++) for (let i = 0; i < mapData.xs.length; i++) paintCell(i, j); renderMapLegend(); }
+  function drawMark() {
+    const g = document.getElementById('mapmark'); if (!g || !mapGeom) return;
+    const { xs, ys } = mapData, { cw, chh, ml, mt } = mapGeom;
+    const fx = (P.span - xs[0]) / (xs[xs.length - 1] - xs[0]), fy = (P.trussH - ys[0]) / (ys[ys.length - 1] - ys[0]);
+    if (fx < -0.02 || fx > 1.02 || fy < -0.02 || fy > 1.02) { g.innerHTML = ''; return; }
+    const x = ml + cw / 2 + fx * (xs.length - 1) * cw, y = mt + chh / 2 + (1 - fy) * (ys.length - 1) * chh;
+    g.innerHTML = `<circle cx="${x}" cy="${y}" r="6.5" style="fill:none;stroke:var(--ink);stroke-width:2"/><circle cx="${x}" cy="${y}" r="2" style="fill:var(--ink)"/>`;
+  }
+  function renderMapLegend() {
+    const el = $('#maplegend'); if (!el) return;
+    if (mapMode === 'verdict') el.innerHTML = ['ok', 'warn', 'bad'].map((s) => `<span class="small" style="display:inline-flex;gap:6px;align-items:center"><i style="width:14px;height:10px;border-radius:2px;background:var(--cell-${s});display:inline-block"></i>${VERDICT[s]}</span>`).join('') + '<span class="small">Réserves : proportions, angles, transport, économie. Hors limites : aucun profil ne passe, flèche excessive, pente insuffisante ou masse démesurée. Survolez une case pour le détail.</span>';
+    else el.innerHTML = `<span class="small" style="display:inline-flex;gap:8px;align-items:center">10 kg/m² <i style="width:120px;height:10px;border-radius:2px;display:inline-block;background:linear-gradient(90deg, ${ramp(0)}, ${ramp(0.5)}, ${ramp(1)})"></i> 60 kg/m² et plus</span><span class="small" style="display:inline-flex;gap:6px;align-items:center"><i style="width:14px;height:10px;border-radius:2px;background:var(--cell-na);display:inline-block"></i>hors limites</span>`;
+  }
+
+  /* ----- Acier / bois ----- */
+  let cmpKey = '', cmpData = null;
+  function paneCompare(el) {
+    const key = JSON.stringify(Object.assign({}, P, { material: '' }));
+    if (key !== cmpKey || !cmpData) {
+      cmpKey = key;
+      cmpData = { steel: PS.compute(Object.assign({}, P, { material: 'steel' }), { light: true }), timber: PS.compute(Object.assign({}, P, { material: 'timber' }), { light: true }) };
+    }
+    const S = cmpData.steel, T = cmpData.timber;
+    const cur = P.material;
+    const vol = (r) => {
+      if (!r.qty) return null;
+      const t = r.geo.truss;
+      if (r.material.kind === 'steel') return r.qty.total / 7850;
+      let v = 0;
+      for (const m of t.members) v += r.secs[m.g].A * 1e-6 * m.L;
+      v *= r.geo.nFrames;
+      v += 2 * r.geo.nFrames * r.P.colH * r.secs.col.A * 1e-6;
+      v += r.geo.purlins.length * r.P.length * r.purl.sec.A * 1e-6;
+      return v;
+    };
+    const cell = (r, fn) => { try { return fn(r); } catch (e) { return '—'; } };
+    const rows = [
+      ['Verdict', (r) => `<span class="pill ${r.diag.verdict}">${VERDICT[r.diag.verdict]}</span>`],
+      ['Masse de la structure', (r) => `${nf(r.qty.total / 1000, 2)} t`],
+      ['Ratio', (r) => `${nf(r.qty.perM2, 1)} kg/m²`],
+      ['Volume de matière', (r) => `${nf(vol(r), 2)} m³`],
+      ['Membrure supérieure', (r) => r.secs.top.label],
+      ['Membrure inférieure', (r) => r.secs.bot.label],
+      ['Montants', (r) => r.secs.vert.label],
+      ['Diagonales', (r) => r.secs.diag.label],
+      ['Poteaux', (r) => r.secs.col.label],
+      ['Pannes', (r) => r.purl.sec.label],
+      ['Flèche de la ferme', (r) => `${nf(r.sls.defl * 1000, 0)} mm / ${nf(r.sls.deflLim * 1000, 0)} mm`],
+      ['Masse d’une ferme', (r) => `${nf(r.qty.trussUnit, 0)} kg`],
+    ];
+    const hd = `<div class="h">Critère</div><div class="h${cur === 'steel' ? ' cur' : ''}">Acier ${esc(P.steelGrade)}</div><div class="h${cur === 'timber' ? ' cur' : ''}">Bois ${esc(P.timberGrade)}</div>`;
+    const body = rows.map(([k, fn]) => `<div class="k">${k}</div><div class="v${cur === 'steel' ? ' cur' : ''}">${cell(S, fn)}</div><div class="v${cur === 'timber' ? ' cur' : ''}">${cell(T, fn)}</div>`).join('');
+    const ms = S.qty ? S.qty.perM2 : 0, mt = T.qty ? T.qty.perM2 : 0, mm = Math.max(ms, mt, 1);
+    const vs = vol(S) || 0, vt = vol(T) || 0;
+    const bars = `<div style="display:grid;gap:8px;margin-top:4px">
+      <div><div class="small">Acier — ${nf(ms, 1)} kg/m²</div><div class="bar-u" style="height:10px"><i style="width:${(100 * ms / mm).toFixed(0)}%;background:var(--steel-bar, #6E7E87)"></i></div></div>
+      <div><div class="small">Bois — ${nf(mt, 1)} kg/m²</div><div class="bar-u" style="height:10px"><i style="width:${(100 * mt / mm).toFixed(0)}%;background:#C08C55"></i></div></div></div>`;
+    el.innerHTML = `<div class="cols"><div><h4>Même projet, deux matériaux</h4><p class="lead">Le calcul est refait avec la même géométrie, les mêmes charges et la même couverture ; seuls les matériaux et leurs règles (Eurocode 3 pour l’acier, Eurocode 5 pour le bois) changent.</p>
+      <div class="scroll-x"><div class="cmp">${hd}${body}</div></div></div>
+      <div><h4>Ce qu’il faut retenir</h4>${bars}
+      <p class="lead" style="margin-top:14px">Le bois est environ ${nf(7850 / (PS.cat.TIMBER[P.timberGrade] || PS.cat.TIMBER.GL24h).rhomean, 0)} fois moins dense que l’acier, mais environ ${nf(210000 / (PS.cat.TIMBER[P.timberGrade] || PS.cat.TIMBER.GL24h).E0mean, 0)} fois moins raide et nettement moins résistant : ses sections sont bien plus grosses${vs && vt ? ` (ici ${nf(vt / vs, 0)} fois plus de volume)` : ''}, la structure reste pourtant plus légère.</p>
+      <p class="lead">En bois, ce sont souvent les assemblages qui dimensionnent : la section nette autour des broches (80 % de la section ici) et la place nécessaire pour les loger. Le fluage augmente aussi la flèche à long terme (k<sub>def</sub> = 0,6).</p></div></div>`;
+  }
+
+  /* ----- Nomenclature ----- */
+  function paneBom(el) {
+    if (!R.bom) { el.innerHTML = `<p class="lead">${esc(R.error || 'Pas de nomenclature.')}</p>`; return; }
+    const b = R.bom, timber = R.material.kind === 'timber';
+    const tile = (k, v, u) => `<div class="tile"><span>${k}</span><b>${v}${u ? ` <small>${u}</small>` : ''}</b></div>`;
+    const tiles = tile('Masse totale', nf(b.total / 1000, 2), 't') + tile('Ratio', nf(b.perM2, 1), 'kg/m²') + tile('Pièces', nf(b.pieces, 0), '') +
+      tile('Repères distincts', nf(b.marks, 0), '') +
+      (timber ? tile('Volume de bois', nf(b.timberVol, 2), 'm³') + tile('Dont acier', nf(b.steelMass / 1000, 2), 't')
+        : tile('Surface à peindre', nf(b.paint, 0), 'm²') + tile('Éclisses de chantier', nf(b.splices * R.geo.nFrames, 0), '')) +
+      tile('Ferme assemblée', nf(b.heaviest, 0), 'kg') + tile(timber ? 'Broches' : 'Boulons', nf(b.bolts, 0), '');
+    let cat = '', rows = '';
+    for (const r of b.rows) {
+      if (r.cat !== cat) { cat = r.cat; rows += `<tr class="cat"><td colspan="7">${esc(cat)}</td></tr>`; }
+      rows += `<tr><td>${esc(r.item)}${r.note ? `<div class="small">${esc(r.note)}</div>` : ''}</td><td class="mono">${esc(r.profile)}</td><td class="n">${nf(r.qty, 0)}</td><td class="n">${r.unitLen != null ? nf(r.unitLen, 2) : '—'}</td><td class="n">${r.totalLen != null ? nf(r.totalLen, 1) : '—'}</td><td class="n">${r.unitMass != null ? nf(r.unitMass, 1) : '—'}</td><td class="n">${nf(r.mass, 0)}</td></tr>`;
+    }
+    el.innerHTML = `<div class="tiles">${tiles}</div>
+      <div class="toolbar"><button class="btn primary" type="button" id="csv">Télécharger le tableau (CSV)</button><button class="btn" type="button" id="obj">Exporter la maquette pour Rhino (OBJ)</button><button class="btn" type="button" id="copy">Copier le tableau</button></div>
+      <div class="scroll-x"><table class="t"><thead><tr><th>Désignation</th><th>Profil</th><th class="n">Qté</th><th class="n">L. unit. (m)</th><th class="n">L. totale (m)</th><th class="n">kg/m</th><th class="n">Masse (kg)</th></tr></thead>
+      <tbody>${rows}</tbody><tfoot><tr><td colspan="6">Total</td><td class="n">${nf(b.total, 0)}</td></tr></tfoot></table></div>
+      <p class="small" style="margin-top:8px">Goussets, platines et boulonnerie sont estimés d’après les efforts ; les longueurs sont celles des axes, sans chutes ni coupes d’onglet. Export OBJ en mètres, Y vertical, un groupe par type de pièce plus les axes des barres.</p>`;
+    $('#csv', el).addEventListener('click', () => saveFile('atelier-treillis-nomenclature.csv', '﻿' + bomCSV(), 'text/csv'));
+    $('#copy', el).addEventListener('click', () => {
+      const txt = bomCSV().replace(/;/g, '\t');
+      if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => toast('Tableau copié'), () => toast('Copie refusée par le navigateur'));
+      else toast('Copie indisponible');
+    });
+    $('#obj', el).addEventListener('click', exportOBJ);
+  }
+  function bomCSV() {
+    const b = R.bom, n = (v, d) => v == null ? '' : nf(v, d).replace(/ | /g, '');
+    const lines = [['Catégorie', 'Désignation', 'Profil', 'Quantité', 'Longueur unitaire (m)', 'Longueur totale (m)', 'Masse linéique (kg/m)', 'Masse (kg)', 'Remarque'].join(';')];
+    for (const r of b.rows) lines.push([r.cat, r.item, r.profile, r.qty, n(r.unitLen, 3), n(r.totalLen, 2), n(r.unitMass, 2), n(r.mass, 1), r.note].map((x) => `"${String(x).replace(/"/g, '""')}"`).join(';'));
+    lines.push(['', 'Total', '', '', '', '', '', n(b.total, 1), ''].join(';'));
+    lines.push('');
+    lines.push(`"Projet";"${P.typo} ${P.pattern}, portée ${P.span} m, longueur ${P.length} m, poteaux ${P.colH} m, ferme ${P.trussH} m, ${P.material === 'steel' ? 'acier ' + P.steelGrade : 'bois ' + P.timberGrade}, couverture ${P.roofing}"`);
+    return lines.join('\r\n');
+  }
+  async function exportOBJ() {
+    if (!PS.view3d || !viewOK) { toast('La vue 3D est nécessaire pour l’export'); return; }
+    const obj = PS.view3d.exportOBJ(R);
+    const inArtifact = !!(G.claude && G.claude.use);
+    if (inArtifact) await saveFile('atelier-treillis.zip', zipStore('atelier-treillis.obj', new TextEncoder().encode(obj)), 'application/zip');
+    else await saveFile('atelier-treillis.obj', obj, 'text/plain');
+  }
+  async function saveFile(name, data, mime) {
+    if (G.claude && G.claude.use) {
+      try {
+        const dl = await G.claude.use('downloads');
+        if (dl) { await dl.save({ filename: name, data: typeof data === 'string' ? data : new Blob([data], { type: mime }) }); toast('Fichier enregistré'); return; }
+      } catch (err) {
+        if (err && err.code === 'declined') { toast('Téléchargement annulé'); return; }
+        if (err && err.code === 'rejected_extension') { toast('Format refusé par cette vue'); return; }
+      }
+    }
+    const blob = data instanceof Blob ? data : new Blob([data], { type: mime });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    toast('Fichier enregistré');
+  }
+  // ZIP minimal sans compression (le format .obj n'est pas proposé directement par la visionneuse d'artefacts)
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function zipStore(name, bytes) {
+    let crc = 0xFFFFFFFF; for (let i = 0; i < bytes.length; i++) crc = CRC[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8); crc = (crc ^ 0xFFFFFFFF) >>> 0;
+    const nb = new TextEncoder().encode(name), size = bytes.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    [[0, 0x04034b50, 4], [4, 20, 2], [6, 0x0800, 2], [8, 0, 2], [10, 0, 2], [12, 0x21, 2], [14, crc, 4], [18, size, 4], [22, size, 4], [26, nb.length, 2], [28, 0, 2]].forEach(([o, v, s]) => s === 4 ? lh.setUint32(o, v, true) : lh.setUint16(o, v, true));
+    const cd = new DataView(new ArrayBuffer(46));
+    [[0, 0x02014b50, 4], [4, 20, 2], [6, 20, 2], [8, 0x0800, 2], [10, 0, 2], [12, 0, 2], [14, 0x21, 2], [16, crc, 4], [20, size, 4], [24, size, 4], [28, nb.length, 2], [30, 0, 2], [32, 0, 2], [34, 0, 2], [36, 0, 2], [38, 0, 4], [42, 0, 4]].forEach(([o, v, s]) => s === 4 ? cd.setUint32(o, v, true) : cd.setUint16(o, v, true));
+    const cdOff = 30 + nb.length + size, cdSize = 46 + nb.length;
+    const end = new DataView(new ArrayBuffer(22));
+    [[0, 0x06054b50, 4], [4, 0, 2], [6, 0, 2], [8, 1, 2], [10, 1, 2], [12, cdSize, 4], [16, cdOff, 4], [20, 0, 2]].forEach(([o, v, s]) => s === 4 ? end.setUint32(o, v, true) : end.setUint16(o, v, true));
+    return new Blob([lh, nb, bytes, cd, nb, end], { type: 'application/zip' });
+  }
+
+  /* ----- Hypothèses ----- */
+  function paneHyp(el) {
+    const lp = R.lp, g = R.geo, m = R.material, timber = m.kind === 'timber';
+    const dl = (rows) => `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+    el.innerHTML = `<div class="warnbox"><strong>Outil pédagogique de prédimensionnement.</strong> Les résultats donnent des ordres de grandeur pour comprendre et comparer des partis structurels. Ils ne remplacent pas la note de calcul d’un bureau d’études (assemblages, fondations, neige accidentelle, sismique, incendie, vérifications locales).</div>
+    <div class="hyp">
+      <section><h4>Modèle</h4><p>Une file courante est calculée en 2D : ferme en treillis articulé, posée en tête de poteaux encastrés en pied (système hyperstatique, comme dans le tutoriel). Méthode des déplacements, élasticité linéaire. Toutes les fermes reçoivent le profil de la file courante.</p>
+      ${dl([['Panneaux', `${g.n} × ${nf(g.truss.dx, 2)} m`], ['Barres de la ferme', g.truss.members.length], ['Entraxe', `${nf(g.e, 2)} m`], ['Filants (maintien hors plan)', `tous les ${g.kb} nœuds`], ['Poids propre des assemblages', '+10 %']])}</section>
+      <section><h4>Neige — NF EN 1991-1-3</h4>${dl([['Région', `${esc(P.snowRegion)}, altitude ${P.altitude} m`], ['s<sub>k</sub>', `${nf(lp.sk, 2)} kN/m²`], ['Pente', `${nf(lp.alphaDeg, 1)}°`], ['μ<sub>1</sub>', nf(lp.mu1, 2)], ['s = μ<sub>1</sub> s<sub>k</sub>', `${nf(lp.s, 2)} kN/m²`], ['Cas dissymétrique', g.shape.twoSided ? '0,5 μ₁ sur un versant' : '—']])}</section>
+      <section><h4>Vent — NF EN 1991-1-4</h4>${dl([['Région', `${P.windRegion} (v<sub>b,0</sub> = ${lp.wind.vb} m/s)`], ['Rugosité', esc(PS.TERRAIN[P.terrain].label)], ['Hauteur de référence', `${nf(lp.wind.z, 1)} m`], ['q<sub>p</sub>(z)', `${nf(lp.qp, 3)} kN/m²`], ['c<sub>pe</sub> parois D / E', `${nf(lp.cpeD, 2)} / ${nf(lp.cpeE, 2)}`], ['c<sub>pi</sub>', '+0,2 / −0,3'], ['Toiture', 'zones H et I, c<sub>pe,10</sub>']])}</section>
+      <section><h4>Charges permanentes</h4>${dl([['Couverture', `${esc(g.roofing.label)} — ${nf(g.roofing.g, 2)} kN/m²`], ['Pannes', `${esc(R.purl.sec.label)} tous les ${nf(Math.max(...g.purlins.map((p) => p.trib)), 2)} m max`], ['Ferme et poteaux', 'poids propre des profils']])}</section>
+      <section><h4>Combinaisons (EC0, 6.10)</h4><p>${R.combos.map((c) => `${c.id} : ${esc(c.label)}`).join('<br>')}</p><p>ELS : G + S pour la flèche, G + W pour le déplacement en tête.</p></section>
+      <section><h4>Matériau</h4>${timber ? dl([['Classe', esc(m.tg.label)], ['f<sub>t,0,k</sub> / f<sub>c,0,k</sub> / f<sub>m,k</sub>', `${m.tg.ft0k} / ${m.tg.fc0k} / ${m.tg.fmk} MPa`], ['E<sub>0,mean</sub> / E<sub>0,05</sub>', `${m.tg.E0mean} / ${m.tg.E005} MPa`], ['γ<sub>M</sub>', nf(m.tg.gM, 2)], ['k<sub>mod</sub>', '0,6 (permanent) / 0,9 (neige, vent)'], ['k<sub>def</sub> (classe de service 1)', nf(m.tg.kdef, 1)], ['Section nette en traction', '80 %']])
+        : dl([['Nuance', `${m.grade.key}, f<sub>y</sub> = ${m.fy} MPa`], ['E', '210 000 MPa'], ['γ<sub>M0</sub> = γ<sub>M1</sub>', '1,00'], ['Flambement', 'courbes EC3 (tubes finis à chaud : a)'], ['Classe de section', '≤ 3 (sections élancées exclues)'], ['Tirants', 'S235, section résistante filetée']])}</section>
+      <section><h4>Limites retenues</h4>${dl([['Flèche de ferme', `l / ${g.roofing.deflRatio}`], ['Flèche de panne', `e / ${g.roofing.deflRatio}`], ['Déplacement en tête', 'H / 150'], ['Élancement barre comprimée', timber ? '150' : '200'], ['Élancement barre tendue', timber ? '250' : '300'], ['Pente minimale', `${nf(g.roofing.minSlope * 100, 0)} % (valeur indicative)`], ['Longueur de barre', '12 m (éclisse au-delà)']])}</section>
+      <section><h4>D’où vient la géométrie</h4><p>La logique de construction reprend les tutoriels Grasshopper de Keris Studio : division de la portée, décalage de liste pour les diagonales, symétrie, nombre de fermes arrondi puis entraxe recalculé, contreventement des travées d’extrémité.</p><p><a href="https://www.keris-studio.fr/blog/?p=11665" target="_blank" rel="noopener">Ferme paramétrique, partie 1</a> · <a href="https://www.keris-studio.fr/blog/?p=11711" target="_blank" rel="noopener">partie 2 : trame et contreventements</a></p></section>
+    </div>`;
+  }
+
+  /* ---------------- Divers ---------------- */
+  let toastT = null;
+  function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2200);
+  }
+
+  function onTheme() {
+    if (PS.view3d && viewOK) PS.view3d.applyTheme();
+    if (tab === 'map') paintMap();
+  }
+
+  /* ---------------- Démarrage ---------------- */
+  function start() {
+    buildParams();
+    buildTabs();
+    buildViewControls();
+    syncControls();
+    try {
+      if (!PS.view3d || !G.THREE || !G.THREE.OrbitControls) throw new Error('three.js indisponible');
+      PS.view3d.init($('#viewport'), $('#tip'));
+      viewOK = true;
+    } catch (err) {
+      console.error(err);
+      $('#gl-error').hidden = false;
+    }
+    run();
+    const mq = G.matchMedia && G.matchMedia('(prefers-color-scheme: dark)');
+    if (mq && mq.addEventListener) mq.addEventListener('change', onTheme);
+    new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
